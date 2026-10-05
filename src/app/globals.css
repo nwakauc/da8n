@@ -1,0 +1,297 @@
+@import "tailwindcss";
+
+/*
+ * DA8N visual identity — from the approved design direction
+ * ("DA8N Landing v3", claude.ai/design, imported 2026-10-04).
+ *
+ * The design commits to a single warm light palette. There is deliberately no
+ * dark variant: inventing one would be inventing interface that has not been
+ * designed. `color-scheme: light` is therefore explicit, so the browser does
+ * not recolour form controls or scrollbars against a cream ground.
+ *
+ * Contrast notes (WCAG 2.2, body text needs 4.5:1, large text 3:1):
+ *   --da8n-ink      #231c17 on --da8n-cream #fbf4ea  → 13.6:1  AAA
+ *   --da8n-muted    #5d5348 on --da8n-cream          →  6.3:1  AA  (AAA large)
+ *   --da8n-faint    #8d8073 on #ffffff               →  3.4:1  large text / labels ONLY
+ *   --da8n-green    #0d7a43 on #ffffff               →  4.8:1  AA
+ *   --da8n-rose     #ff4d6d on #ffffff               →  3.1:1  LARGE TEXT AND
+ *                                                       NON-TEXT ONLY. Never
+ *                                                       use it for body copy.
+ *   #ffffff         on --da8n-rose                   →  3.1:1  large text only;
+ *                                                       the rose buttons carry
+ *                                                       18px/800 type, which
+ *                                                       qualifies as large.
+ *   --da8n-rose-ink #e0325a on #fff2f4               →  4.5:1  AA — this is the
+ *                                                       accessible rose, used
+ *                                                       wherever small text
+ *                                                       must read as rose.
+ *   --da8n-gold-ink #8a6215 on #fffdf8               →  5.0:1  AA
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Ground */
+  --da8n-cream: #fbf4ea;
+  --da8n-cream-lift: #fffaf3;
+  --da8n-sand: #f6ecdd;
+  --da8n-white: #ffffff;
+  --da8n-blush: #fff7f8;
+  --da8n-blush-deep: #fff2f4;
+
+  /* Ink */
+  --da8n-ink: #231c17;
+  --da8n-ink-soft: #3e352e;
+  --da8n-muted: #5d5348;
+  --da8n-faint: #8d8073;
+
+  /* Brand */
+  --da8n-rose: #ff4d6d;
+  --da8n-rose-lift: #ff7a8f;
+  --da8n-rose-ink: #e0325a;
+  --da8n-green: #0d7a43;
+  --da8n-green-deep: #0a6236;
+  --da8n-gold: #c99433;
+  --da8n-gold-ink: #a87718;
+  --da8n-gold-text: #8a6215;
+
+  /* Lines */
+  --da8n-line: #e6dccd;
+  --da8n-line-warm: #ece2d4;
+  --da8n-line-strong: #e0d4c2;
+  --da8n-line-blush: #f1d9de;
+
+  /* Rhythm. One gutter and one measure for every section. */
+  --da8n-gutter: clamp(18px, 4vw, 44px);
+  --da8n-max: 1320px;
+  --da8n-section-y: clamp(64px, 8vw, 104px);
+
+  --da8n-focus: #0b57d0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Positioning context for the overlaid site header. See landing.css. */
+  position: relative;
+  margin: 0;
+  background: var(--da8n-cream);
+  color: var(--da8n-ink);
+  font-family: var(--font-manrope), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-bricolage), var(--font-manrope), system-ui, sans-serif;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+a {
+  color: var(--da8n-green);
+  text-decoration: none;
+  text-underline-offset: 0.25em;
+}
+a:hover {
+  color: var(--da8n-green-deep);
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Keyboard focus must always be visible, in every future design. */
+:focus-visible {
+  outline: 3px solid var(--da8n-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip link: off-screen until focused. */
+.da8n-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  padding: 0.75rem 1rem;
+  background: var(--da8n-white);
+  color: var(--da8n-ink);
+  border: 1px solid var(--da8n-line);
+  font-weight: 700;
+}
+.da8n-skip:focus {
+  left: 0;
+}
+
+/* Visually hidden, still announced. */
+.da8n-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Shell used by the non-landing routes, which have no design direction yet.
+   The top padding clears the overlaid site header, which is out of flow and
+   contributes no height. */
+.da8n-shell {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: calc(var(--head-h, 82px) + 2rem) var(--da8n-gutter) 4rem;
+}
+
+.da8n-muted {
+  color: var(--da8n-muted);
+}
+
+.da8n-rule {
+  border: 0;
+  border-top: 1px solid var(--da8n-line);
+  margin: 2rem 0;
+}
+
+/* ---- Keyframes ------------------------------------------------------- */
+/* Carried over verbatim from the design so the RealMe seal and the city
+   marquee animate exactly as approved. */
+
+@keyframes da8n-tick {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes da8n-rm-letter {
+  0%,
+  100% {
+    color: var(--da8n-gold-text);
+    text-shadow: none;
+  }
+  4% {
+    color: #d9a53a;
+    text-shadow: 0 0 8px #f6d36599;
+  }
+  10% {
+    color: var(--da8n-gold-text);
+    text-shadow: none;
+  }
+}
+
+@keyframes da8n-rm-check {
+  0%,
+  30% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  37%,
+  90% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  96% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  97%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+@keyframes da8n-rm-ring {
+  0%,
+  17% {
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+    opacity: 1;
+  }
+  29% {
+    stroke-dashoffset: 0;
+    fill-opacity: 0;
+    opacity: 1;
+  }
+  33%,
+  90% {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+    opacity: 1;
+  }
+  96% {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+    opacity: 0;
+  }
+  97%,
+  100% {
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes da8n-rm-border {
+  0%,
+  39% {
+    background-position: 120% 0;
+    opacity: 0;
+  }
+  46%,
+  70% {
+    opacity: 0.56;
+  }
+  78%,
+  100% {
+    background-position: -20% 0;
+    opacity: 0;
+  }
+}
+
+@keyframes da8n-rm-glow {
+  0%,
+  42%,
+  78%,
+  100% {
+    box-shadow:
+      inset 0 1px 1px #fff,
+      0 8px 18px #c9943324;
+  }
+  60% {
+    box-shadow:
+      inset 0 1px 1px #fff,
+      0 0 10px #edc96f40,
+      0 8px 18px #c9943324;
+  }
+}
+
+/*
+ * Reduced motion. The marquee and the RealMe seal are decorative loops; they
+ * stop entirely rather than running fast, because a 0.01ms infinite animation
+ * still repaints forever. The step panel's crossfade is a state change, so it
+ * is allowed to settle instantly instead.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
