@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="DA8N">
+  <!--
+    DA8N browser mark.
+
+    WHY THE 8 IS GEOMETRY AND NOT TEXT
+    The sibling platform mark (apps/d8n/web/src/app/icon.svg) sets "D8" in
+    `system-ui`. That is fine there and risky as a brand mark: a favicon set in
+    a font renders differently on every OS, and at 16px the difference between
+    San Francisco and Segoe UI is the difference between a readable glyph and a
+    smudge. Drawing the 8 as two rings makes it identical everywhere and
+    independent of what fonts the device has.
+
+    It also says something true. Two circles, linked — the figure the whole
+    product is about — which is why the 8 is the character the wordmark already
+    accents in rose ("da8n", pronounced dating).
+
+    WHY ROSE GROUND AND NOT INK
+    The wordmark is ink with a rose 8, but inverting it here is deliberate. D8N
+    the platform is a dark, neutral square; DA8N the consumer brand should be
+    legible as its warm sibling at a glance in a tab strip, and a saturated
+    ground reads at 16px where a 2px rose glyph on dark does not.
+
+    GEOMETRY. This is the source of truth; `apple-icon.tsx` and the mark on
+    `opengraph-image.tsx` are this, scaled. Checked by rendering at 16, 32, 64
+    and 180 rather than by eyeballing the numbers:
+
+      stroke 3.3/32 is ~1.65px at 16px, above the hairline threshold where a
+      stroke drops to a grey smear on a 1x display. Thinner (2.9) rendered as
+      two readable circles rather than one confident glyph.
+
+      The rings overlap by 1.7/32. Less and it reads as two stacked circles;
+      the overlap is what fuses them into an 8.
+
+      Vertically the whole figure spans 5.75-26.35, i.e. centred on 16.05 —
+      centred on the INK, not on the circle centres, which sit lower because
+      the lower ring is the larger one.
+  -->
+  <rect width="32" height="32" rx="9" fill="#ff4d6d"/>
+  <g fill="none" stroke="#fff7f8" stroke-width="3.3">
+    <circle cx="16" cy="11.6" r="4.2"/>
+    <circle cx="16" cy="19.4" r="5.3"/>
+  </g>
+</svg>

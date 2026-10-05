@@ -709,6 +709,24 @@ export type FooterColumn = {
   readonly links: readonly NavItem[];
 };
 
+/**
+ * The share card's subline (`app/opengraph-image.tsx`).
+ *
+ * It is NOT `FOOTER_TAGLINE`. That string opens "Pronounced dating.", and the
+ * card already carries "pronounced dating" next to the wordmark — which is
+ * the one piece of copy on it that has to stay, because the whole point of
+ * the name is that people cannot guess how to say it. Reusing the tagline put
+ * the same phrase on the card twice.
+ *
+ * It is also not `HERO.subTitle` ("We help you find him."). The headline pair
+ * is rendered as designed on the page and that is the owner's call, but a
+ * share card travels without its page to people who did not ask for it;
+ * putting the one line that narrows a global product to a single gender on
+ * every link anyone shares is a separate decision, not an inherited one.
+ */
+export const SHARE_SUBLINE =
+  "Real people, clear intentions, and one global network — meet someone in your city or across borders.";
+
 export const FOOTER_TAGLINE =
   "Pronounced dating. Real people looking for something real, at home and across borders.";
 

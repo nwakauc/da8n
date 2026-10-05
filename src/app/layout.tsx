@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Caveat, Manrope } from "next/font/google";
 import "./globals.css";
 import "./chrome.css";
@@ -67,6 +67,23 @@ export const metadata: Metadata = {
   description: DEFAULT_DESCRIPTION,
   applicationName: SITE_NAME,
   robots: { index: false, follow: false },
+};
+
+/**
+ * `themeColor` tints the browser UI on Android Chrome and in some desktop
+ * tab strips. It is the page ground, `--da8n-cream`, so the chrome continues
+ * the page rather than framing it in default grey.
+ *
+ * It lives in `viewport`, not `metadata` — Next moved it there, and leaving it
+ * in `metadata` is a silent no-op plus a build warning.
+ *
+ * No `prefers-color-scheme` variant: `globals.css` sets `color-scheme: light`
+ * and commits to a single warm palette, because inventing a dark one would be
+ * inventing interface that has not been designed.
+ */
+export const viewport: Viewport = {
+  themeColor: "#fbf4ea",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

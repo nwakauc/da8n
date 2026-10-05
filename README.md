@@ -106,6 +106,10 @@ a slug that changes meaning after it is indexed is a real cost.
 | `src/app/landing.css` | landing page component styles |
 | `src/components/landing/` | one component per landing section |
 | `src/app/chrome.css` | the header and footer. **Imported by `layout.tsx`, not by a page** |
+| `src/app/icon.svg` | the DA8N mark, and the source of truth for its geometry |
+| `src/app/apple-icon.tsx` | iOS home-screen PNG, 180x180, generated at build |
+| `src/app/opengraph-image.tsx` | the share card, 1200x630 PNG, generated at build |
+| `src/app/manifest.ts` | Android icon and theme colour. Deliberately not a PWA |
 | `src/content/route-copy.ts` | market/city/index copy, and the availability vocabulary |
 | `src/lib/nav.ts` | resolves a section fragment so nav works off the landing page |
 
@@ -241,6 +245,53 @@ and end on the join CTA. **They still invent nothing**: no member counts, no
 local activity, no inventory. The honest-state `.notice` is how a page says its
 editorial copy is unwritten, and it is deleted at the same time as that copy is
 written, not before.
+
+### Brand assets (2026-10-05)
+
+The site had **no icon and no share card at all**. A tab showed a blank page
+glyph, an iOS shortcut showed a screenshot, Android had no home-screen icon,
+and — because `buildPageMetadata` sets `twitter: { card: "summary_large_image" }`
+on every page while supplying no image — every shared link rendered as an empty
+grey box with a domain under it. On a product whose acquisition model is people
+sending each other links, that was the most-seen unbuilt design on the site.
+
+| File | What it is |
+|---|---|
+| `src/app/icon.svg` | Browser tab mark. **Source of truth for the geometry** |
+| `src/app/apple-icon.tsx` | 180x180 PNG for iOS "Add to Home Screen" |
+| `src/app/opengraph-image.tsx` | 1200x630 share card, applies to every route |
+| `src/app/manifest.ts` | Android icon + `theme_color`; `display: browser` |
+
+**The mark is the 8 drawn as two linked rings** on the brand rose, not a letter
+in a font. Two reasons. A favicon set in `system-ui` — which the sibling
+`apps/d8n/web` mark does — renders differently on every OS, and at 16px the
+difference between San Francisco and Segoe UI is the difference between a glyph
+and a smudge. And two linked circles is the figure the product is about, which
+is why the wordmark accents that character in rose in the first place.
+
+Ground is rose with a cream glyph, inverting the wordmark's ink-with-rose-8.
+D8N the platform is a dark neutral square; DA8N the consumer brand should read
+as its warm sibling at a glance in a tab strip, and a saturated ground survives
+16px where a thin rose glyph on dark does not.
+
+Geometry was chosen by rendering at 16, 32, 64 and 180 and comparing, not by
+eye: stroke 3.3/32 (thinner read as two circles rather than one glyph), rings
+overlapping by 1.7/32 (less and they separate), and the figure optically
+centred on its ink rather than on the circle centres, which sit low because the
+lower ring is the larger one. **`icon.svg` is the source; the other two are it,
+scaled.** Note that scaling is not a straight multiply — an SVG stroke is
+centred on the radius while a CSS border is drawn inside the box, so each
+ring's CSS box is the SVG's *outer* diameter. Getting that wrong produces a
+mark a third too small, which is exactly what the first cut of
+`apple-icon.tsx` did.
+
+The share card's subline is `SHARE_SUBLINE` in `content/landing.ts`, and
+deliberately neither `FOOTER_TAGLINE` (which opens "Pronounced dating." and
+would print that phrase on the card twice) nor `HERO.subTitle` ("We help you
+find him.") — a share card travels without its page to people who did not ask
+for it, so putting the one line that narrows a global product to a single
+gender on every shared link is a separate decision rather than an inherited
+one. It is flagged as question 3 below and unchanged on the page itself.
 
 ### Awaiting legal review
 
