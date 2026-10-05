@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { HERO, SHARE_SUBLINE } from "@/content/landing";
+import { markDataUri } from "@/lib/mark";
 
 /**
  * The share card: what a DA8N link renders as in a message, a post or a
@@ -51,41 +52,13 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          {/* The mark — icon.svg geometry scaled 76/32. See apple-icon.tsx
-              for why the box is the outer diameter and not 2r. */}
-          <div
-            style={{
-              width: 76,
-              height: 76,
-              borderRadius: 22,
-              background: "#ff4d6d",
-              display: "flex",
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 13.7,
-                left: 24.1,
-                width: 27.8,
-                height: 27.8,
-                borderRadius: 27.8,
-                border: "7.8px solid #fff7f8",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                top: 29.6,
-                left: 21.5,
-                width: 33,
-                height: 33,
-                borderRadius: 33,
-                border: "7.8px solid #fff7f8",
-              }}
-            />
-          </div>
+          {/*
+            The mark, rasterised from the same source as the favicon
+            (`lib/mark.ts`). No tile behind it: the card ground is already
+            cream, so the heart reads as a silhouette exactly as it does in a
+            light tab strip.
+          */}
+          <img src={markDataUri()} width={84} height={84} alt="" />
           <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
             <div style={{ display: "flex", fontSize: 52, fontWeight: 800, letterSpacing: -2 }}>
               <div style={{ display: "flex" }}>da</div>
