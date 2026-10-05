@@ -58,13 +58,18 @@ export function Cities() {
           ))}
 
           {/*
-            Not a link. There is no city-index route yet — `/cities` is a
-            reserved slug with nothing served at it — and a prominent tile
-            pointing at a 404 from the highest-authority page on the site is
-            worse than a tile that is plainly informational. Becomes an <a>
-            the moment the index route lands.
+            A real link now. This was an inert <div> styled as the most
+            prominent tile in the grid — rose gradient, drop shadow, an arrow —
+            because there was nowhere for it to go: `/cities` was reserved only
+            at market level, so a top-level `/cities` 404'd through the `/{cc}`
+            catch-all.
+
+            The fix was to build the index rather than to demote the tile. A
+            page listing every market and every city is derivable from the
+            catalogs in full, and it is the internal-linking hub this site
+            wants anyway. See `app/cities/page.tsx`.
           */}
-          <div className="ccard ccard--all">
+          <Link href="/cities" className="ccard ccard--all">
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <span className="ccard__country">{CITIES_SECTION.allKicker}</span>
               <h3>{CITIES_SECTION.allLabel}</h3>
@@ -77,7 +82,7 @@ export function Cities() {
               </span>
               <span aria-hidden="true">→</span>
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="places">

@@ -28,6 +28,11 @@ export const TOP_LEVEL_RESERVED: readonly string[] = [
   "membership",
   "stories",
   "markets",
+  // The city index. Reserved top-level as well as per-market: `cities` was
+  // only in MARKET_RESERVED (guarding `/gb/cities`), so a top-level `/cities`
+  // fell through to the `/{cc}` catch-all and 404'd as an unknown market —
+  // while `Cities.tsx` carried a comment asserting it was already reserved.
+  "cities",
   "compare",
   "audiences",
   "how-it-works",

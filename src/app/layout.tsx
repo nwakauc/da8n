@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Caveat, Manrope } from "next/font/google";
 import "./globals.css";
+import "./chrome.css";
 import {
   DEFAULT_DESCRIPTION,
   SITE_NAME,
@@ -53,7 +54,7 @@ const caveat = Caveat({
  *
  * What is deliberate here and should survive future redesigns:
  *   - semantic landmarks (banner / navigation / main / contentinfo)
- *   - a skip link as the first focusable element
+ *   - a skip link as the first focusable element, whose target is focusable
  *   - `lang` on <html>, so screen readers and translation both work
  *   - sitewide Organization + WebSite JSON-LD, emitted once
  *   - metadataBase, so every relative canonical resolves to the right origin
@@ -85,7 +86,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <SiteHeader />
 
-        <main id="main">{children}</main>
+        {/*
+          `tabIndex={-1}` is what makes the skip link actually work. Without
+          it the browser scrolls <main> into view but leaves focus on the skip
+          link, so the next Tab goes straight back into the header nav — the
+          exact trap the skip link exists to avoid. -1 makes <main>
+          programmatically focusable without adding a tab stop.
+        */}
+        <main id="main" tabIndex={-1}>
+          {children}
+        </main>
 
         <SiteFooter />
 

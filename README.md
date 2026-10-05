@@ -2,7 +2,7 @@
 
 - **Owner:** Uchechi Nwaka
 - **Status:** Phase 1 in progress — technical shell. **Not** the final DA8N product or design.
-- **Last verified:** 2026-10-04
+- **Last verified:** 2026-10-05
 
 The public, server-rendered acquisition surface for DA8N: markets, cities,
 guides, comparisons and product explainers.
@@ -73,8 +73,10 @@ needs its own.
 /                        home
 /{cc}                    market          /ng, /za, /gb, /us, /ca
 /{cc}/{city}             city            /ng/lagos, /za/cape-town
-/{cc}/diaspora/{origin}  corridor        /gb/diaspora/ng
-/guides/{slug}           editorial
+/{cc}/diaspora/{origin}  corridor        /gb/diaspora/ng  (not built)
+/cities                  city index
+/privacy, /terms         legal
+/guides/{slug}           editorial        (not built)
 /audiences/{slug}        audience
 /compare/{slug}          comparison
 ```
@@ -103,6 +105,9 @@ a slug that changes meaning after it is indexed is a real cost.
 | `src/app/globals.css` | DA8N design tokens, keyframes, accessibility baseline |
 | `src/app/landing.css` | landing page component styles |
 | `src/components/landing/` | one component per landing section |
+| `src/app/chrome.css` | the header and footer. **Imported by `layout.tsx`, not by a page** |
+| `src/content/route-copy.ts` | market/city/index copy, and the availability vocabulary |
+| `src/lib/nav.ts` | resolves a section fragment so nav works off the landing page |
 
 ### Indexability
 
@@ -158,8 +163,12 @@ semantic landmarks, a skip link as the first focusable element, a visible focus
 ring on everything, reduced-motion support. **Do not remove those when the
 design next changes.**
 
-The routes other than `/` are still intentionally neutral and carry
-`INTENTIONALLY NEUTRAL` comments: market and city pages have no design yet.
+The market, city, `/cities`, 404 and legal routes now share a second, quieter
+system — `.page`, `.chipgrid`, `.prose`, `.notice` in `globals.css` — built on
+the same tokens as the landing page. It is not a second design language; it is
+the brand's type and ground applied to pages whose editorial copy is still
+pending. They were `INTENTIONALLY NEUTRAL` scaffolding until 2026-10-05; see
+"Fixed after the design import" below for what that was costing.
 
 ### What changed in translation, and why
 
@@ -205,6 +214,75 @@ Neither gets `Review` or `AggregateRating` markup, now or later. The only
 structured data the page emits is `WebPage` and `FAQPage`, and the FAQ markup
 is generated from the same array the FAQ section renders, so it cannot describe
 a question the page does not visibly answer.
+
+### Fixed after the design import (2026-10-05)
+
+A review of the imported shell found five defects that the green check suite
+could not see, because nothing in this app renders a component in a test. All
+five are fixed; the gap that hid them is the top item under "Next" below.
+
+| | What was wrong | Fix |
+|---|---|---|
+| 1 | **The header and footer were unstyled on all 43 non-landing routes.** `layout.tsx` renders both on every route; their rules lived in `landing.css`, which only `app/page.tsx` imports. The bar sat in normal flow while `.da8n-shell` still reserved `--head-h` above it, every nav link showed at every width, and the burger showed on desktop | Chrome moved to `src/app/chrome.css`, imported by `layout.tsx`. Shared primitives (`.rose`, `.btn`, `.draft`) moved to `globals.css`. `landing.css` keeps only landing styles, so a city route still does not download them |
+| 2 | **"Privacy policy" in the footer pointed at `#safety`** — a marketing section. For a product whose pitch is ID documents and live selfies, that is a misrepresentation about compliance, and `/privacy` + `/terms` are App Store and Play Store requirements regardless | `/privacy` and `/terms` built. Both are drafts carrying a visible review banner, and the legal identity facts are bracketed rather than invented — see "Awaiting legal review" below |
+| 3 | **Every header and footer fragment link was dead on non-landing routes.** `#how`, `#cities`, … exist only on the landing page, so on 43 routes clicking a nav item did nothing — no error, no navigation | `src/lib/nav.ts` resolves a fragment against `/`. Footer columns also de-duplicated: five of ten links previously shared a destination with another link |
+| 4 | **Three controls looked interactive and were not** — the da8n+ and VIP tier CTAs (same `.tier__cta` pill as the working "Join free"), the "Explore all cities" tile (the most prominent card in the grid, an inert `<div>`), and the background-check request (bold rose text with an arrow). Each absorbed a click and gave no feedback | Tier CTAs and the background-check label take `.is-soon`: flat, muted, dashed, default cursor, "Soon" chip. The cities tile became a **real link** — `/cities` is now built (see below), which was the better fix than demoting the one navigational hub the site wants |
+| 5 | **The primary CTA failed WCAG AA.** `globals.css` justified white-on-rose at 3.21:1 as "large text", but `.btn--primary` was 18px/800 and WCAG's large-bold threshold is 14pt = 18.66px, so it was held to the 4.5:1 normal-text bar and failed it | `font-size: 19px` (14.25pt bold) — now genuinely large-scale, so 3.21:1 is compliant, and the approved brand rose is untouched. A deeper fill (`#d92e54`, 4.70:1) is noted in the CSS as the stronger option if the owner wants it |
+
+Smaller items in the same pass: the skip link now moves focus (`<main tabIndex={-1}>` — it previously scrolled but left focus in the header); the city marquee is `aria-hidden` instead of announcing "Cities on DA8N: … Berlin, Singapore, Lisbon", which contradicted this file's own rule that the band claims no operation; the hero profile card is `priority` (it was the only above-the-fold image and was lazy-loaded); the mobile menu closes on Escape and on an outside press, returning focus to the button; `/cities` was reserved only at market level, so `Cities.tsx`'s comment claiming otherwise was wrong and a top-level `/cities` 404'd; `cities.ts` still described `au` as `planned` long after it was promoted; the copyright year is computed; market and city pages emit the `BreadcrumbList` they visibly render.
+
+**Market and city pages have a design now.** They previously printed `Market
+status: acquisition. Default locale: en-AE.` and "content is not written yet.
+This route exists to prove the grammar and the entity model" — internal
+vocabulary, and a dead end on the highest-intent click the site has. They now
+carry the brand's type and rhythm, state availability in product voice
+(`AVAILABILITY` in `route-copy.ts`, never the raw `status` enum), link onward,
+and end on the join CTA. **They still invent nothing**: no member counts, no
+local activity, no inventory. The honest-state `.notice` is how a page says its
+editorial copy is unwritten, and it is deleted at the same time as that copy is
+written, not before.
+
+### Awaiting legal review
+
+`/privacy` and `/terms` are published as **drafts**, with a banner saying so.
+Everything technical in the privacy notice was verified against this app's
+source — no `fetch`, no cookies, no analytics, no browser storage, no
+third-party requests, fonts self-hosted — and it must stay true: if this site
+ever gains a form, an embed, an analytics tool or a cookie, that notice changes
+in the same slice.
+
+What cannot be inferred from a repository is bracketed in the documents and
+needs the founder: legal entity name, registered address, privacy contact
+route, DPO or representative where required, log retention period, hosting
+processor and region, international transfer mechanism, liability cap,
+governing law and jurisdiction. **A privacy notice without a controller
+identity and a contact route is not compliant**, so these are blocking for
+launch rather than cosmetic.
+
+### Next (not done here)
+
+1. **Component tests.** `vitest.config.mts` is `environment: "node"` and
+   `include: ["src/**/*.test.ts"]`, so a `.test.tsx` would not even match. All
+   133 tests are catalog and library tests, and every accessibility decision
+   documented in the components is unenforced — nothing fails if `role="tab"`
+   disappears, if `RealMeBadge` loses its `aria-label`, or if a tier CTA
+   becomes a live `<a href="#">`. That is what let all five defects above ship
+   green. It needs `jsdom` and a render library, which is a dependency change
+   and therefore its own slice.
+2. The 11 remaining `STATIC_ROUTES` in `registry.ts` that have no page:
+   `/how-it-works`, `/safety`, `/realme`, `/about`, `/markets`, `/guides`,
+   `/audiences`, `/compare`, `/stories`, `/help`, `/cookies`. Nothing leaks —
+   every one is `entityIndexable: false`, so the sitemap stays empty — but the
+   registry currently describes more than the site serves.
+3. `isValidDiasporaCorridor` checks `destination.status` and never
+   `origin.status`, and is unreferenced; no diaspora route is built yet.
+4. `findDuplicates` is not wired into any verdict, so the site-wide
+   title/H1/canonical uniqueness rule is defined but not enforced — and three
+   `IndexabilityReason` values (`duplicate_title`, `duplicate_h1`,
+   `duplicate_canonical`) are consequently unreachable.
+5. The split `title` / `titleAccent` copy pattern, with a load-bearing
+   trailing space, cannot survive translation now that `fr` is a market with
+   `defaultLocale: fr-FR`.
 
 ### Open decisions from the import
 

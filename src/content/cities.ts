@@ -64,7 +64,10 @@ export const CITIES: readonly City[] = [
   { slug: "calgary", name: "Calgary", countryCode: "ca", region: "Alberta", indexable: false, relatedCitySlugs: ["vancouver", "toronto"] },
   { slug: "ottawa", name: "Ottawa", countryCode: "ca", region: "Ontario", indexable: false, relatedCitySlugs: ["toronto"] },
 
-  // Australia — market is `planned`, so these have no public route yet.
+  // Australia — promoted to `acquisition` in markets.ts when the approved
+  // landing design put Sydney on the city grid, so both of these are routed
+  // and in the build. (This comment said `planned` long after that stopped
+  // being true.)
   { slug: "sydney", name: "Sydney", countryCode: "au", region: "New South Wales", indexable: false, relatedCitySlugs: ["melbourne"] },
   { slug: "melbourne", name: "Melbourne", countryCode: "au", region: "Victoria", indexable: false, relatedCitySlugs: ["sydney"] },
 

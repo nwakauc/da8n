@@ -1,19 +1,31 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { buildPageMetadata } from "@/lib/seo";
+import Link from "next/link";
+import { breadcrumbJsonLd, buildPageMetadata, toJsonLdScript, webPageJsonLd } from "@/lib/seo";
 import { publicMarkets } from "@/content/markets";
 import { citiesInMarket } from "@/content/cities";
-import { cityPath, marketPath, resolveTopLevel } from "@/lib/routing";
-import Link from "next/link";
+import { marketPath, resolveTopLevel } from "@/lib/routing";
+import { CityChip } from "@/components/CityChip";
+import { AVAILABILITY, EDITORIAL_PENDING, JOIN_CTA, MARKET_COPY, showJoinCta } from "@/content/route-copy";
+import { JOIN_URL } from "@/lib/app-links";
 
 /**
  * `/{cc}` — a market, i.e. a localized entry point into the one global DA8N
  * network. Not a country-specific application.
  *
- * INTENTIONALLY NEUTRAL presentation. Market page content is Stage 1G.
- *
  * `generateStaticParams` returns only public markets, so a `planned` market
  * has no route at all rather than an empty one.
+ *
+ * PRESENTATION — this page used to be `INTENTIONALLY NEUTRAL` dev scaffolding
+ * that printed `Market status: acquisition. Default locale: en-AE.` and "this
+ * route exists to prove the grammar" at visitors. It is the destination of the
+ * landing page's city grid, so it now carries the brand's own type, ground and
+ * rhythm, states availability in product voice, and ends on a real CTA.
+ *
+ * It still asserts nothing about who is here: no member counts, no local
+ * activity, no "N people near you". See the content rules in
+ * `content/route-copy.ts`. Editorial copy is still pending and the page says
+ * so, which is also why `indexable` stays gated on the catalog.
  */
 type Params = { cc: string };
 
@@ -47,35 +59,97 @@ export default async function MarketPage({ params }: { params: Promise<Params> }
 
   const { market } = resolved;
   const cities = citiesInMarket(market.countryCode);
+  const elsewhere = publicMarkets().filter(
+    (candidate) => candidate.countryCode !== market.countryCode,
+  );
+
+  /*
+   * BreadcrumbList, matching the breadcrumb the page visibly renders. The
+   * builder already existed in `lib/seo.ts` and was unused — a page showing a
+   * trail to a reader and not to a crawler is leaving the cheapest structured
+   * data on the site unclaimed.
+   */
+  const jsonLd = [
+    webPageJsonLd({
+      path: marketPath(market.countryCode),
+      name: `Dating in ${market.countryName}`,
+      description: MARKET_COPY.intro(market),
+    }),
+    breadcrumbJsonLd([
+      { name: "DA8N", path: "/" },
+      { name: market.countryName, path: marketPath(market.countryCode) },
+    ]),
+  ];
 
   return (
-    <div className="da8n-shell">
-      <nav aria-label="Breadcrumb">
-        <Link href="/">DA8N</Link> / <span aria-current="page">{market.countryName}</span>
-      </nav>
+    <div className="page">
+      <div className="page__in">
+        <header className="page__head">
+          <nav aria-label="Breadcrumb" className="crumbs">
+            <Link href="/">DA8N</Link>
+            <span aria-hidden="true" className="crumbs__sep">
+              /
+            </span>
+            <span aria-current="page">{market.countryName}</span>
+          </nav>
 
-      <h1>Dating in {market.countryName}</h1>
-      <p className="da8n-muted">
-        Market status: {market.status}. Default locale: {market.defaultLocale}.
-      </p>
-      <p>
-        {/* Content awaiting Stage 1G. No fabricated member counts or local
-            activity — see the content rules in README.md. */}
-        Market page content is not written yet. This route exists to prove the
-        grammar and the entity model.
-      </p>
+          <span className="page__kicker">{MARKET_COPY.kicker}</span>
+          <h1 className="page__title">
+            Dating in <span className="rose">{market.countryName}</span>
+          </h1>
+          <p className="page__lede">
+            {MARKET_COPY.intro(market)} {AVAILABILITY[market.status]}
+          </p>
 
-      <hr className="da8n-rule" />
+          {showJoinCta(market) ? (
+            <div className="page__cta">
+              <a href={JOIN_URL()} className="btn btn--primary">
+                {JOIN_CTA.label}
+              </a>
+              <span className="page__note">{JOIN_CTA.note}</span>
+            </div>
+          ) : null}
+        </header>
 
-      <h2>Cities</h2>
-      <ul>
-        {cities.map((city) => (
-          <li key={city.slug}>
-            <Link href={cityPath(city)}>{city.name}</Link>
-            {city.region ? <span className="da8n-muted"> — {city.region}</span> : null}
-          </li>
-        ))}
-      </ul>
+        {cities.length > 0 ? (
+          <section className="page__section" aria-labelledby="cities-heading">
+            <h2 id="cities-heading">{MARKET_COPY.citiesHeading}</h2>
+            <p>{MARKET_COPY.citiesLede(market)}</p>
+            <ul className="chipgrid">
+              {cities.map((city) => (
+                <li key={city.slug}>
+                  <CityChip city={city} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        <section className="page__section" aria-labelledby="elsewhere-heading">
+          <h2 id="elsewhere-heading">{MARKET_COPY.elsewhereHeading}</h2>
+          <p>{MARKET_COPY.elsewhereLede}</p>
+          <ul className="chipgrid">
+            {elsewhere.map((candidate) => (
+              <li key={candidate.countryCode}>
+                <Link href={marketPath(candidate.countryCode)} className="chip-link">
+                  <b>{candidate.countryName}</b>
+                  <span>{candidate.countryCode.toUpperCase()}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="page__section">
+          <p className="notice">{EDITORIAL_PENDING}</p>
+        </section>
+      </div>
+
+      <script
+        type="application/ld+json"
+        // Escaped by toJsonLdScript; every value is a literal from the catalog.
+        dangerouslySetInnerHTML={{ __html: toJsonLdScript(jsonLd) }}
+      />
     </div>
   );
 }

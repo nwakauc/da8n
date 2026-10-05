@@ -49,6 +49,8 @@ export function Hero() {
           <div className="hero__cta">
             <a href={JOIN_URL()} className="btn btn--primary">
               {HERO.cta}
+              {/* Decorative. `.btn` already reserves the gap for it. */}
+              <span aria-hidden="true">→</span>
             </a>
           </div>
 
@@ -64,12 +66,21 @@ export function Hero() {
         <div className="hero__aside">
           <figure className="pcard hero__card">
             <div className="pcard__media">
+              {/*
+                `priority` — this is the only above-the-fold raster image on
+                the site and the LCP candidate on wide viewports, where the
+                hero backdrop is a CSS background under a 96%-opaque gradient
+                and the headline is text. `ImageSlot` has had the prop since it
+                was written and nothing set it, so this card lazy-loaded and
+                popped in after first paint.
+              */}
               <ImageSlot
                 src={marcus.photo}
                 alt=""
                 placeholder={`${marcus.name} · New York`}
                 className="slot-fill"
                 sizes="270px"
+                priority
               />
               <span className="pcard__online">
                 <span className="dot" />

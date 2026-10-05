@@ -127,10 +127,18 @@ export function Safety() {
                   {/*
                     Not a link. Background checks are consent-based, bound to a
                     provider and legal in different ways market by market;
-                    there is no flow behind this yet, and a live-looking CTA
-                    that starts nothing is worse than a label.
+                    there is no flow behind this yet.
+
+                    It was styled as bold rose text with a trailing arrow,
+                    i.e. exactly like every real link on the page, so it read
+                    as a live control that silently did nothing. `.is-soon
+                    --inline` keeps it as a label but makes that legible, and
+                    the arrow is gone from the copy because an arrow is a
+                    promise of navigation.
                   */}
-                  <span>{SAFETY_PROFILE.backgroundCheck.cta}</span>
+                  <span className="is-soon is-soon--inline">
+                    {SAFETY_PROFILE.backgroundCheck.cta}
+                  </span>
                 </li>
               </ul>
             </div>

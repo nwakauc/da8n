@@ -11,10 +11,18 @@ import { JOIN_URL } from "@/lib/app-links";
  *   - The section keeps the design's DRAFT stamp.
  *   - Only `purchasable: true` renders an anchor. That is the free tier, and
  *     it points at sign-up, which is a thing that works today. The paid tiers
- *     render as non-interactive labels, because a button marked "Go VIP" that
- *     leads nowhere is a worse experience than a card that is plainly
- *     informational — and because a live-looking checkout entry for a product
- *     with no checkout is the kind of thing that gets read as an offer.
+ *     render as non-interactive labels, because a live-looking checkout entry
+ *     for a product with no checkout gets read as an offer.
+ *
+ *     THAT ONLY WORKS IF IT LOOKS NON-INTERACTIVE, which it did not. The
+ *     labels carried the same `.tier__cta` class as the working anchor, so
+ *     "See da8n+" and "Go VIP" rendered as solid, full-width pill buttons
+ *     identical to "Join free" — and absorbed a click with no navigation, no
+ *     error and no feedback of any kind. That is the worst outcome available:
+ *     it reads as broken rather than as unavailable. `.is-soon` makes the
+ *     state visible — flat, muted, dashed border, default cursor, and a "Soon"
+ *     chip — so the card is informational in the interface and not only in
+ *     this comment.
  *
  * The VIP feature list contains two claims that need a decision before this
  * is public: financial screening of members, and background checks
@@ -64,7 +72,7 @@ export function Membership() {
                   {tier.cta}
                 </a>
               ) : (
-                <span className="tier__cta">{tier.cta}</span>
+                <span className="tier__cta is-soon">{tier.cta}</span>
               )}
             </div>
           ))}

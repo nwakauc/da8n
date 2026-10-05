@@ -46,6 +46,7 @@ const STATIC_ROUTES: readonly RouteCandidate[] = [
   { path: "/realme", kind: "static", entityIndexable: false, changeFrequency: "monthly", priority: 0.8 },
   { path: "/about", kind: "static", entityIndexable: false, changeFrequency: "monthly", priority: 0.6 },
   { path: "/markets", kind: "static", entityIndexable: false, changeFrequency: "weekly", priority: 0.7 },
+  { path: "/cities", kind: "static", entityIndexable: false, changeFrequency: "weekly", priority: 0.7 },
   { path: "/guides", kind: "static", entityIndexable: false, changeFrequency: "weekly", priority: 0.7 },
   { path: "/audiences", kind: "static", entityIndexable: false, changeFrequency: "monthly", priority: 0.6 },
   { path: "/compare", kind: "static", entityIndexable: false, changeFrequency: "monthly", priority: 0.6 },

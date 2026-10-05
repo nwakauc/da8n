@@ -119,6 +119,17 @@ video {
   border-radius: 4px;
 }
 
+/*
+ * <main> is focusable only as the skip link's target (tabIndex -1 in
+ * layout.tsx). A 3px ring around the whole page is noise rather than
+ * information — arriving at the content is itself the feedback — so the ring
+ * is suppressed here and nowhere else. Every real control keeps it.
+ */
+main:focus,
+main:focus-visible {
+  outline: none;
+}
+
 /* Skip link: off-screen until focused. */
 .da8n-skip {
   position: absolute;
@@ -148,13 +159,365 @@ video {
   border: 0;
 }
 
-/* Shell used by the non-landing routes, which have no design direction yet.
-   The top padding clears the overlaid site header, which is out of flow and
-   contributes no height. */
-.da8n-shell {
-  max-width: 44rem;
+/* ---- Shared primitives ----------------------------------------------- */
+/*
+ * Used by more than one route, so they live here rather than in `landing.css`.
+ * See the note at the top of `chrome.css`: anything that is not specific to a
+ * single page is loaded for every page.
+ */
+
+.rose {
+  color: var(--da8n-rose);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 999px;
+  font-family: var(--font-manrope), sans-serif;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/*
+ * CONTRAST — do not lower this font-size.
+ *
+ * White on --da8n-rose measures 3.21:1. WCAG 2.2 SC 1.4.3 allows 3:1 only for
+ * "large scale" text, which for bold type means >= 14pt = 18.66px. This button
+ * was 18px/800, which is BELOW that threshold, so it was being held to the
+ * 4.5:1 normal-text bar and failing it — on the primary call to action of the
+ * whole site, in both the hero and the closing CTA.
+ *
+ * 19px/800 is 14.25pt bold, which does qualify, so 3.21:1 is compliant. The
+ * change is imperceptible and keeps the approved brand rose exactly as it is.
+ *
+ * The stronger alternative, if the owner will accept a slightly deeper fill:
+ * background #d92e54 measures 4.70:1 and would pass as normal text at any
+ * size. The hover state (--da8n-rose-ink #e0325a) already measures 4.40:1.
+ */
+.btn--primary {
+  padding: 18px 30px;
+  font-size: 19px;
+  background: var(--da8n-rose);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(255, 77, 109, 0.28);
+}
+.btn--primary:hover {
+  color: #fff;
+  background: var(--da8n-rose-ink);
+}
+
+/* Secondary action. Outlined, so it never competes with the primary CTA. */
+.btn--ghost {
+  padding: 17px 28px;
+  font-size: 17px;
+  background: transparent;
+  color: var(--da8n-ink);
+  border: 1.5px solid var(--da8n-line-strong);
+}
+.btn--ghost:hover {
+  color: var(--da8n-ink);
+  background: var(--da8n-cream-lift);
+  border-color: var(--da8n-ink);
+}
+
+/*
+ * The "not available yet" treatment.
+ *
+ * Three things on the landing page are deliberately NOT interactive, because
+ * there is nothing behind them yet: the da8n+ and VIP tier CTAs, the "explore
+ * all cities" tile, and the background-check request. That decision is right —
+ * a live-looking control that starts nothing is worse than a label.
+ *
+ * It was being undermined by styling them identically to the controls that DO
+ * work, which produced the worst outcome available: a button that looks real,
+ * absorbs a click, and gives no feedback at all. This class is what makes the
+ * difference visible — flat, muted, no shadow, no pointer, and a "Soon" chip
+ * via ::after so the reason is on the element rather than in a comment.
+ */
+.is-soon {
+  position: relative;
+  background: var(--da8n-sand) !important;
+  color: var(--da8n-muted) !important;
+  border: 1.5px dashed var(--da8n-line-strong) !important;
+  box-shadow: none !important;
+  cursor: default;
+}
+/*
+ * Inline variant, for a label sitting in running text rather than in a button
+ * box — the background-check line inside the example Safety Profile. The block
+ * treatment would read as a broken button there, so this keeps the text flow
+ * and just removes the link signals: no rose, no underline, no arrow.
+ */
+.is-soon--inline {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--da8n-muted) !important;
+  font-weight: 700;
+}
+
+.is-soon::after {
+  content: "Soon";
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--da8n-cream-lift);
+  border: 1px solid var(--da8n-line);
+  font: 800 10px var(--font-manrope), sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--da8n-muted);
+  white-space: nowrap;
+}
+
+/* The DRAFT stamp. The design uses it to mark copy that is not yet a
+   commitment; we reuse it rather than inventing a second idiom. */
+.draft {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #fff6e0;
+  color: #9a6500;
+  font: 800 11px var(--font-manrope), sans-serif;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+/* ---- Content routes -------------------------------------------------- */
+/*
+ * Everything that is not the landing page: markets, cities, legal.
+ *
+ * These were previously unstyled `.da8n-shell` dev scaffolding that printed
+ * internal vocabulary at visitors ("Market status: acquisition", "content is
+ * not written yet"). They are the destination of the landing page's city
+ * grid — the highest-intent click on the site — so they get the brand's own
+ * type, ground and rhythm, and they end on a real call to action instead of
+ * a dead end.
+ *
+ * No fabricated member counts, no local activity claims, no invented
+ * inventory: a page can be designed and still be honest that its editorial
+ * copy is not written. Those are not in tension.
+ */
+
+.page {
+  padding-top: var(--head-h);
+}
+
+.page__in {
+  max-width: 76rem;
   margin: 0 auto;
-  padding: calc(var(--head-h, 82px) + 2rem) var(--da8n-gutter) 4rem;
+  padding: clamp(28px, 5vw, 56px) var(--da8n-gutter) clamp(56px, 8vw, 96px);
+}
+
+/* Narrow measure for long-form reading. 68ch is ~the upper bound for
+   comfortable line length; the legal pages use it. */
+.page__in--prose {
+  max-width: 44rem;
+}
+
+.page__head {
+  border-bottom: 1px solid var(--da8n-line);
+  padding-bottom: clamp(24px, 4vw, 36px);
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font: 600 14px var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+  margin-bottom: 18px;
+}
+.crumbs a {
+  color: var(--da8n-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--da8n-line-strong);
+}
+.crumbs a:hover {
+  color: var(--da8n-ink);
+  text-decoration-color: currentColor;
+}
+.crumbs [aria-current="page"] {
+  color: var(--da8n-ink);
+  font-weight: 700;
+}
+.crumbs__sep {
+  color: var(--da8n-faint);
+}
+
+.page__kicker {
+  display: block;
+  font: 800 12px var(--font-manrope), sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--da8n-rose-ink);
+  margin-bottom: 10px;
+}
+
+.page__title {
+  margin: 0;
+  font-size: clamp(34px, 6vw, 60px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.page__lede {
+  margin: 14px 0 0;
+  font: 500 clamp(17px, 2vw, 20px) / 1.6 var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+  max-width: 38em;
+  text-wrap: pretty;
+}
+
+.page__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+}
+.page__cta .page__note {
+  font: 500 14px var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+}
+
+.page__section {
+  margin-top: clamp(32px, 5vw, 52px);
+}
+.page__section > h2 {
+  margin: 0 0 4px;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.page__section > p {
+  margin: 0 0 20px;
+  color: var(--da8n-muted);
+  max-width: 38em;
+  text-wrap: pretty;
+}
+
+/*
+ * A city or market link as a chip. A grid of these is navigation, so it is a
+ * <ul> — the count is announced, and it degrades to a readable list with no
+ * CSS at all, which is what the market pages were previously relying on by
+ * accident rather than by design.
+ */
+.chipgrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+.chip-link {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  height: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--da8n-white);
+  border: 1px solid var(--da8n-line);
+  color: var(--da8n-ink);
+  box-shadow: 0 1px 0 rgba(35, 28, 23, 0.03);
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.chip-link:hover {
+  color: var(--da8n-ink);
+  border-color: var(--da8n-rose);
+  transform: translateY(-1px);
+}
+.chip-link b {
+  font: 800 16px var(--font-manrope), sans-serif;
+  letter-spacing: -0.01em;
+}
+.chip-link span {
+  font: 500 12.5px var(--font-manrope), sans-serif;
+  color: var(--da8n-faint);
+  text-align: right;
+}
+
+/*
+ * The honest-state callout. This is how a page says "the writing is not done"
+ * without printing a status enum at a visitor, and without filling the gap
+ * with invented content. It is a <p>, not an alert: nothing has gone wrong.
+ */
+.notice {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--da8n-cream-lift);
+  border: 1px solid var(--da8n-line);
+  border-left: 3px solid var(--da8n-gold);
+  font: 500 15px/1.6 var(--font-manrope), sans-serif;
+  color: var(--da8n-ink-soft);
+  max-width: 44em;
+  text-wrap: pretty;
+}
+
+/* ---- Long-form prose (legal, explainers) ----------------------------- */
+
+.prose {
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--da8n-ink-soft);
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  margin-top: 2.2em;
+  margin-bottom: 0.5em;
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--da8n-ink);
+}
+.prose h3 {
+  margin-top: 1.8em;
+  margin-bottom: 0.4em;
+  font-size: 17.5px;
+  font-weight: 800;
+  color: var(--da8n-ink);
+}
+.prose ul {
+  margin-left: 0;
+  padding-left: 1.2em;
+}
+.prose li + li {
+  margin-top: 0.45em;
+}
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.prose strong {
+  color: var(--da8n-ink);
+  font-weight: 700;
+}
+.prose code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--da8n-sand);
+  font-size: 0.9em;
+}
+
+/* Effective/updated date line under a legal page's title. */
+.prose__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  font: 600 13.5px var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
 }
 
 .da8n-muted {
@@ -165,6 +528,58 @@ video {
   border: 0;
   border-top: 1px solid var(--da8n-line);
   margin: 2rem 0;
+}
+
+/* ---- Legal pages ----------------------------------------------------- */
+
+/*
+ * The "awaiting legal review" banner, and the inline placeholder for a fact
+ * only the founder can supply.
+ *
+ * These exist because a privacy notice and a set of terms are legal
+ * instruments, not copy. The technical content here is accurate and verified
+ * against the code — this app really does set no cookies, run no analytics and
+ * make no API calls. The IDENTITY facts are a different thing: the controller's
+ * legal name, registered address, contact route and governing law cannot be
+ * inferred from a repository, and inventing them would make the document worse
+ * than useless because it would look finished.
+ *
+ * So they are marked, visibly, in both the document and docs/HUMAN-TODO.md.
+ * Fill them in, have counsel review, delete the banner.
+ */
+.legal-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 clamp(28px, 4vw, 40px);
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fff6e0;
+  border: 1px solid #f0dca8;
+  border-left: 3px solid var(--da8n-gold);
+}
+.legal-banner b {
+  font: 800 13px var(--font-manrope), sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6215;
+}
+.legal-banner p {
+  margin: 0;
+  font: 500 14.5px/1.6 var(--font-manrope), sans-serif;
+  color: var(--da8n-ink-soft);
+  text-wrap: pretty;
+}
+
+.awaiting {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: #fff6e0;
+  border: 1px dashed #d9b86a;
+  font: 700 0.92em var(--font-manrope), sans-serif;
+  color: #8a6215;
+  white-space: nowrap;
 }
 
 /* ---- Keyframes ------------------------------------------------------- */

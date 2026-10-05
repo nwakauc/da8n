@@ -73,7 +73,14 @@ export const HERO = {
   title: "Your person could be ",
   titleAccent: "anywhere.",
   subTitle: "We help you find him.",
-  cta: "Join da8n for free →",
+  /*
+   * No arrow in the string. "→" is announced as "right arrow" by some screen
+   * readers, and the glyph belongs to presentation rather than to copy — the
+   * component renders a decorative, aria-hidden one. Same reason the
+   * background-check label lost its arrow: on something inert, an arrow is a
+   * promise of navigation.
+   */
+  cta: "Join da8n for free",
   note: "Free to join · verify in about four minutes",
   script: ["Be the real you.", "Your person wants the authentic you."],
 } as const;
@@ -426,7 +433,7 @@ export const SAFETY_PROFILE = {
   backgroundCheck: {
     label: "BACKGROUND CHECK",
     status: "Not completed",
-    cta: "Request a background check →",
+    cta: "Request a background check",
   },
 } as const;
 
@@ -706,10 +713,28 @@ export const FOOTER_TAGLINE =
   "Pronounced dating. Real people looking for something real, at home and across borders.";
 
 /**
- * Footer links point at in-page anchors or routable paths only. The design
- * had every link as `href="#"`; a placeholder href on a sitewide footer is a
- * crawl trap, so anything without a real destination yet points at the
- * section that explains it instead.
+ * Footer links.
+ *
+ * Two rules, both learned the hard way:
+ *
+ * 1. EVERY LINK HAS A UNIQUE DESTINATION. The design had every link as
+ *    `href="#"`; the first translation replaced those with the section that
+ *    explains each one, which removed the crawl trap but left five of ten
+ *    links pointing somewhere another link already went — three in the SAFETY
+ *    column all went to `#safety`, and "VIP matchmaking" and "Membership"
+ *    both went to `#membership`. A footer where half the links are the same
+ *    link is noise that costs a reader time and tells a crawler nothing.
+ *    "Romance-scam prevention" and "VIP matchmaking" come back as real
+ *    entries when `/safety` and `/membership` are real pages.
+ *
+ * 2. A LINK'S LABEL IS A PROMISE ABOUT ITS DESTINATION. "Privacy policy"
+ *    pointed at `#safety` — a marketing section, not a policy. For a product
+ *    whose pitch is ID documents and live selfies, that is not a tidy
+ *    placeholder; it is a misrepresentation about compliance. It now points
+ *    at `/privacy`, which exists.
+ *
+ * Anchors are checked against the rendered section ids by `landing.test.ts`,
+ * and routed paths must resolve through the registry.
  */
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
@@ -717,7 +742,7 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     links: [
       { label: "How it works", href: "#how" },
       { label: "Compatibility", href: "#compatibility" },
-      { label: "VIP matchmaking", href: "#membership" },
+      { label: "Cities", href: "#cities" },
       { label: "Membership", href: "#membership" },
     ],
   },
@@ -725,8 +750,7 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     heading: "SAFETY",
     links: [
       { label: "Safety & verification", href: "#safety" },
-      { label: "Romance-scam prevention", href: "#safety" },
-      { label: "Privacy policy", href: "#safety" },
+      { label: "Questions", href: "#faq" },
     ],
   },
   {
@@ -734,9 +758,20 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     links: [
       { label: "About", href: "#why" },
       { label: "Stories", href: "#stories" },
-      { label: "Questions", href: "#faq" },
+    ],
+  },
+  {
+    heading: "LEGAL",
+    links: [
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
     ],
   },
 ];
 
-export const LEGAL_LINE = "© 2026 da8n. Adults 18+ only.";
+/*
+ * The copyright year is computed, not written. A hardcoded "© 2026" is wrong
+ * from 1 January and nobody notices, because nobody re-reads a footer.
+ */
+export const legalLine = (now: Date = new Date()) =>
+  `© ${now.getUTCFullYear()} da8n. Adults 18+ only.`;
