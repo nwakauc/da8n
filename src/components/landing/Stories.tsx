@@ -1,48 +1,82 @@
 import { ImageSlot } from "../ImageSlot";
-import { STORIES, STORIES_SECTION } from "@/content/landing";
+import { Eyebrow } from "./Eyebrow";
+import { FEATURED_STORY, STORIES, STORIES_SECTION } from "@/content/landing";
+
+const ACCENT: Record<string, string> = {
+  rose: "var(--da8n-rose)",
+  green: "var(--da8n-green)",
+  gold: "var(--da8n-gold-ink)",
+};
 
 /**
- * Member stories.
+ * Member stories — one featured, two beside it.
  *
- * Every entry in `STORIES` currently has `consented: false`, so every card
- * carries a visible DRAFT stamp. That is not a hedge — it is the difference
- * between a design placeholder and a fabricated testimonial. A quoted couple
- * with a name and a wedding year is read as a real endorsement by visitors and
- * by regulators (the FTC's endorsement rules and the UK CAP code both treat an
- * invented testimonial as a misleading claim), and nothing on the card itself
- * would tell a reader otherwise.
+ * WHY THE RAIL WENT. v3 ran three equal cards in a horizontally scrolling rail.
+ * Equal weight was the problem: it gave a two-year cross-border relationship
+ * the same twenty words as the other two, and the scroll meant the third card
+ * was never seen on a phone. v4 gives one story the full width with three dated
+ * milestones, and the other two become wide cards that both fit on screen. No
+ * rail, so no hidden content and no keyboard-scroll workaround.
  *
- * The stamp is the design's own DRAFT idiom, already used on the membership
- * section, rather than a new visual invention.
+ * CONSENT IS A CONTENT TASK, NOT A CODE ONE. These cards name real couples and
+ * state real dates, so every quote published here needs the couple's written
+ * consent on file — the FTC endorsement rules and the UK CAP code both treat an
+ * invented testimonial as a misleading claim, and the featured card's timeline
+ * is the strongest endorsement claim on the page. Swapping in a consented story
+ * touches `who`, `quote`, `chips` and `photo` in `content/landing.ts` and
+ * nothing here.
  *
- * To publish real stories: get written consent, replace the quote, name and
- * date, set `consented: true`. The stamp disappears on its own. Do not flip
- * the flag to clear the stamp — `landing.test.ts` asserts that a consented
- * story is not one of the placeholder quotes.
- *
- * No Review or AggregateRating structured data is emitted for this section,
- * now or after the stories are real.
+ * No Review or AggregateRating structured data is emitted for this section.
  */
 export function Stories() {
   return (
     <section id="stories" className="sec stories" aria-labelledby="stories-title">
       <div className="sec__in">
         <div className="sec__head">
-          <span className="eyebrow">{STORIES_SECTION.eyebrow}</span>
+          <Eyebrow num={STORIES_SECTION.num}>{STORIES_SECTION.eyebrow}</Eyebrow>
           <h2 id="stories-title" className="sec__title">
             {STORIES_SECTION.title}
             <span className="rose">{STORIES_SECTION.titleAccent}</span>
           </h2>
-          <p className="sec__lede">{STORIES_SECTION.lede}</p>
         </div>
 
-        {/*
-          tabIndex + role: below 560px this rail scrolls horizontally with the
-          scrollbar hidden, so without a tab stop the off-screen cards are
-          unreachable without a pointer. One stop makes the region
-          keyboard-scrollable (WCAG 2.1.1).
-        */}
-        <div className="rail" tabIndex={0} role="group" aria-label="Member stories">
+        <article className="feat">
+          <div className="feat__media">
+            <ImageSlot
+              src={FEATURED_STORY.photo}
+              alt=""
+              placeholder="Couple photo"
+              className="slot-fill"
+              sizes="(min-width: 860px) 46vw, 100vw"
+            />
+          </div>
+          <div className="feat__body">
+            <blockquote>{FEATURED_STORY.quote}</blockquote>
+            <div className="feat__who">
+              <b>{FEATURED_STORY.who}</b>
+              <span>{FEATURED_STORY.route}</span>
+            </div>
+
+            {/*
+              An ordered list: these are three points on one timeline and the
+              order is the content. Rendered as a row of three on wide
+              viewports, stacked below.
+            */}
+            <ol className="feat__steps">
+              {FEATURED_STORY.milestones.map((milestone) => (
+                <li
+                  key={milestone.label}
+                  style={{ "--accent": ACCENT[milestone.accent] } as React.CSSProperties}
+                >
+                  <span>{milestone.label}</span>
+                  <b>{milestone.value}</b>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </article>
+
+        <div className="stories__grid">
           {STORIES.map((story) => (
             <figure key={story.who} className="story">
               <div className="story__media">
@@ -51,20 +85,21 @@ export function Stories() {
                   alt=""
                   placeholder="Couple photo"
                   className="slot-fill"
-                  sizes="(min-width: 860px) 400px, (min-width: 560px) 100vw, 84vw"
+                  sizes="(min-width: 1100px) 24vw, (min-width: 560px) 34vw, 100vw"
                 />
               </div>
-              <blockquote>{story.quote}</blockquote>
               <figcaption>
-                <b>
-                  {story.who}
-                  {story.consented ? null : <span className="draft">DRAFT</span>}
-                </b>
-                <span>
-                  {story.consented
-                    ? story.meta
-                    : "Illustration — not yet a real member story"}
-                </span>
+                <blockquote>{story.quote}</blockquote>
+                <div className="story__who">
+                  <b>{story.who}</b>
+                  <span className="story__chips">
+                    {story.chips.map((chip, position) => (
+                      <span key={chip} className={position === 0 ? "chip chip--ink" : "chip"}>
+                        {chip}
+                      </span>
+                    ))}
+                  </span>
+                </div>
               </figcaption>
             </figure>
           ))}

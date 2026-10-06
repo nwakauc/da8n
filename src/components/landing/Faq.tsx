@@ -1,4 +1,7 @@
-import { FAQS, FAQ_SECTION } from "@/content/landing";
+import Link from "next/link";
+import { Eyebrow } from "./Eyebrow";
+import { FAQS, FAQ_SECTION, GUIDES_CARD } from "@/content/landing";
+import { findGuide, guidePath } from "@/content/guides";
 
 /**
  * FAQ.
@@ -18,9 +21,41 @@ export function Faq() {
     <section id="faq" className="sec faq" aria-labelledby="faq-title">
       <div className="sec__in">
         <div className="faq__intro">
-          <span className="eyebrow">{FAQ_SECTION.eyebrow}</span>
+          <Eyebrow num={FAQ_SECTION.num}>{FAQ_SECTION.eyebrow}</Eyebrow>
           <h2 id="faq-title">{FAQ_SECTION.title}</h2>
           <p>{FAQ_SECTION.lede}</p>
+
+          {/*
+            The guides card. Titles come from `content/guides.ts` by slug
+            rather than being written here, so the card can never advertise a
+            guide that does not exist — a missing slug is dropped, and
+            `landing.test.ts` fails first.
+          */}
+          <div className="guides">
+            <span className="guides__kicker">{GUIDES_CARD.kicker}</span>
+            <b className="guides__title">
+              {GUIDES_CARD.title}
+              <span className="rose">{GUIDES_CARD.titleAccent}</span>
+              {GUIDES_CARD.titleTail}
+            </b>
+            <ul className="guides__list">
+              {GUIDES_CARD.slugs.flatMap((slug) => {
+                const guide = findGuide(slug);
+                if (!guide) return [];
+                return [
+                  <li key={slug}>
+                    <Link href={guidePath(slug)}>
+                      {guide.title}
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </li>,
+                ];
+              })}
+            </ul>
+            <Link href="/guides" className="guides__all">
+              All guides
+            </Link>
+          </div>
         </div>
 
         <div className="faq__list">

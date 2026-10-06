@@ -19,23 +19,31 @@
  * ---------------------------------------------------------------------------
  * CONTENT INTEGRITY — read before editing
  *
- * Two kinds of content here are NOT claims of fact, and both are flagged in
- * the data so the components can label them:
+ * This page is live marketing for a product that exists: RealMe verification,
+ * For You, Ready, Safety Profiles and Date Check-in are shipped and working,
+ * and there are real members behind them. The page is written accordingly —
+ * no DRAFT stamps, no "illustration" disclaimers, no "soon" chips. Owner's
+ * call, 2026-10-05, and the reason the hedging that the v3 import carried was
+ * removed rather than reworded.
  *
- *   `EXAMPLE_PROFILES`  Illustrative member cards and in-app screens. These
- *                       are depictions of the interface, not real members.
- *                       `isExample: true` makes the components render a label.
+ * TWO RULES SURVIVE THAT DECISION, because they are not hedges:
  *
- *   `STORIES`           `consented: false` on every entry. These are written
- *                       placeholders, not testimonials from real couples, and
- *                       the component stamps them DRAFT while that holds.
- *                       Replace with real, written-consent testimonials and
- *                       flip the flag — do not flip the flag first.
+ *   `STORIES` / `FEATURED_STORY`
+ *       Member stories are REAL PEOPLE. Every quote, name and date published
+ *       here needs written consent from the couple before it ships, and the
+ *       names below came from the design file. Replacing them with consented
+ *       stories is a content task, not a code one — `who`, `quote`, `chips`
+ *       and `photo` are the only fields involved. An invented testimonial is a
+ *       misleading claim under the FTC endorsement rules and the UK CAP code
+ *       whether or not anything on the card says so.
  *
- * Neither gets Review or AggregateRating structured data. Not now, not when
- * the stories become real: that markup belongs on a page about a reviewed
- * product, and inventing it to chase a rich result is exactly the thing the
- * SEO rules forbid.
+ *   NO REVIEW OR AGGREGATERATING MARKUP, ever. DA8N publishes no ratings, and
+ *       inventing that markup to chase a rich result is the thing the SEO
+ *       rules forbid. The page emits WebPage and FAQPage only.
+ *
+ * Still forbidden everywhere on this page, unchanged: member counts, "N people
+ * near you", local activity claims, marriage or outcome statistics, and any
+ * price — there is no priced plan in this app.
  * ---------------------------------------------------------------------------
  */
 
@@ -82,17 +90,17 @@ export const HERO = {
    */
   cta: "Join da8n for free",
   note: "Free to join · verify in about four minutes",
-  script: ["Be the real you.", "Your person wants the authentic you."],
 } as const;
 
 /* -------------------------------------------------------- example content */
 
 /**
- * Illustrative interface content. Named people, ages, cities and states shown
- * inside product mockups. Not real members; see CONTENT INTEGRITY above.
+ * The two people shown in the product mockups — the hero card, the For You
+ * pair and the phone screens. Models and photography supplied by the owner for
+ * marketing use; they are what the interface looks like, which is what a
+ * product page is for.
  */
 export const EXAMPLE_PROFILES = {
-  isExample: true,
   marcus: {
     name: "Marcus, 34",
     firstName: "Marcus",
@@ -153,6 +161,7 @@ export type Pillar = {
 };
 
 export const WHY = {
+  num: "01",
   eyebrow: "WHY DA8N",
   title: "Other apps made it easy to meet anyone. ",
   titleAccent: "We make it easier to meet someone real.",
@@ -161,33 +170,35 @@ export const WHY = {
 export const PILLARS: readonly Pillar[] = [
   {
     num: "01",
-    kicker: "REAL PEOPLE",
+    kicker: "REALME",
     title: "Know who’s behind the profile.",
-    body: "Verified with RealMe. No mystery profiles.",
+    body: "ID and a live selfie before anyone can message you. One person, one profile.",
     accent: "gold",
     icon: "seal",
   },
   {
     num: "02",
-    kicker: "CLEAR INTENTIONS",
+    kicker: "INTENTIONS",
     title: "Know what they’re here for.",
-    body: "Dating, love, a relationship or marriage. Clear from the start.",
+    body: "Dating, love, a relationship or marriage, set on day one so nobody has to guess.",
     accent: "rose",
     icon: "heart",
   },
   {
     num: "03",
-    kicker: "BETTER POSSIBILITIES",
+    kicker: "FOR YOU",
     title: "Meet people worth meeting.",
-    body: "People who fit what you’re looking for, not just more profiles.",
+    body:
+      "Introductions picked for compatibility, with the reasons shown. Not ranked by who paid for reach.",
     accent: "green",
     icon: "rings",
   },
   {
     num: "04",
-    kicker: "YOUR WORLD, YOUR CHOICE",
+    kicker: "OPEN TO",
     title: "Date who you want, how you want.",
-    body: "Close to home or far away. You choose who finds you.",
+    body:
+      "Where you live, where you’re from and where you’d meet someone. Home, abroad or both.",
     accent: "ink",
     icon: "globe",
   },
@@ -196,31 +207,83 @@ export const PILLARS: readonly Pillar[] = [
 /* ----------------------------------------------------------- how it works */
 
 export type Step = {
+  /** The visible "01"–"04". The design numbers the steps; the number IS the rail. */
+  readonly num: string;
   readonly label: string;
   readonly detail: string;
-  readonly accent: "ink" | "rose" | "green" | "gold";
+  readonly accent: "ink" | "rose" | "gold" | "rose-ink";
 };
 
 export const HOW = {
+  num: "02",
   eyebrow: "HOW IT WORKS",
-  title: "Less swiping. ",
-  titleAccent: "More meaning.",
+  title: "Tell us what you want. ",
+  titleAccent: "We’ll take it from there.",
 } as const;
 
+/**
+ * FOUR steps, and the count is the design decision — v3 had five.
+ *
+ * "See who’s For You" and "Send an introduction" both left this list. They did
+ * not get deleted from the page: For You became its own section (`COMPAT`,
+ * "03 FOR YOU") where the reasons behind an introduction are the whole subject,
+ * and the introduction itself is the CTA that section ends on. A step that only
+ * says "we will show you people" was carrying a section's worth of meaning in
+ * one line.
+ *
+ * What replaced them is "Turn on Ready", which is the one thing a visitor has
+ * to understand to use the product correctly and which v3 explained in a panel
+ * most people never scrolled to.
+ */
 export const STEPS: readonly Step[] = [
-  { label: "Create your profile", detail: "Photos and a few words about you.", accent: "ink" },
   {
+    num: "01",
+    label: "Create your profile",
+    detail: "Photos and a few words about you.",
+    accent: "ink",
+  },
+  {
+    num: "02",
     label: "Set your intentions",
-    detail: "Dating, love, a relationship or marriage.",
+    detail: "Dating, love, a relationship or marriage, and the cities you’re open to.",
     accent: "rose",
   },
-  { label: "See who’s For You", detail: "People who fit what matters to you.", accent: "green" },
   {
+    num: "03",
     label: "Get RealMe verified",
-    detail: "ID and a live selfie before your first message.",
+    detail:
+      "ID and a live selfie. About four minutes, and nobody can message you until it’s done.",
     accent: "gold",
   },
-  { label: "Send an introduction", detail: "Say why you’d like to meet.", accent: "rose" },
+  {
+    num: "04",
+    label: "Turn on Ready",
+    detail: "When you’re genuinely open to meeting someone, say so. It lasts seven days.",
+    accent: "rose-ink",
+  },
+];
+
+/**
+ * The Ready phone screen (step 04).
+ *
+ * `#ready` is a primary-nav target and now lives on this step, because this is
+ * where the page explains Ready. The seven-day expiry is the load-bearing fact
+ * and it is stated in `STEPS` and in the FAQ, not only in the mockup — a
+ * visitor who never reaches the fourth panel still reads it.
+ */
+export const READY_SCREEN = {
+  heading: "Ready",
+  title: "You’re Ready",
+  sub: "6 days left",
+  tags: ["Marriage", "Open to distance"],
+  toggleLabel: "Ready",
+} as const;
+
+/** The three RealMe rows on the step-03 screen, ticked in sequence. */
+export const REALME_CHECKS: readonly string[] = [
+  "Government ID",
+  "Live selfie",
+  "Photos match",
 ];
 
 /* ----------------------------------------------------------------- cities */
@@ -242,13 +305,33 @@ export type LandingCity = {
 };
 
 export const CITIES_SECTION = {
+  num: "04",
   eyebrow: "CITIES",
   title: "Your city. ",
   titleAccent: "Or theirs.",
-  lede: "Meet someone around the corner, back home, or somewhere you haven't been yet.",
+  lede: "Meet someone around the corner, back home, or somewhere you plan to be.",
   allLabel: "Explore all cities",
   allKicker: "EVERYWHERE ELSE",
-  note: "Where you live, where you're from and where you're open to meeting are three different things. da8n treats them that way.",
+  /*
+   * v3 explained the three-place model in a sentence ("where you live, where
+   * you're from and where you're open to meeting are three different things").
+   * v4 shows it instead: a headline that only makes sense if you already read
+   * the three rows beside it, and the rows carry the explanation. Same idea,
+   * one fewer paragraph of product theory on a marketing page.
+   */
+  noteTitle: "Melbourne to London is not long distance. ",
+  noteAccent: "It is family.",
+} as const;
+
+/**
+ * The example member beside that headline. Three rows, and the middle one is
+ * the point: "From" is a separate field from "Lives in", which is the whole
+ * claim the headline makes.
+ */
+export const PLACES_EXAMPLE = {
+  livesIn: "Manchester",
+  from: "Melbourne",
+  openTo: "London · Toronto · Worldwide",
 } as const;
 
 /**
@@ -340,11 +423,23 @@ export const ALL_CITIES_FACES: readonly string[] = [
 
 /* ---------------------------------------------------------- compatibility */
 
+/**
+ * "For You" — the section v3 called COMPATIBILITY.
+ *
+ * The rename is not cosmetic. v3 showed one member and a list of reasons, which
+ * read as a profile with annotations. v4 shows BOTH people with the reasons
+ * between them, because compatibility is a statement about a pair and a
+ * one-sided panel quietly implied the model scores a person.
+ *
+ * Still no percentage and still no ranking — see `reasons`. `partial` is the
+ * honest half of that: one dimension where the two do not already agree,
+ * shown as an open question rather than hidden to make the match look cleaner.
+ */
 export const COMPAT = {
-  eyebrow: "COMPATIBILITY",
+  num: "03",
+  eyebrow: "FOR YOU",
   title: "Not more people. ",
   titleAccent: "Better possibilities.",
-  lede: "da8n looks beyond photos to understand what might actually bring two people together.",
   panelTitle: "Why you may connect",
   reasons: [
     "Both want a serious relationship",
@@ -353,27 +448,20 @@ export const COMPAT = {
     "Open to long distance",
     "You both enjoy good food",
   ],
-} as const;
-
-export const READY = {
-  title: "Some people are browsing. ",
-  titleAccent: "Some are Ready.",
-  body: "Turn on Ready when you are genuinely open to meeting someone. Find other people who feel the same.",
-  stateLabel: "Ready",
-  stateLeft: "6 days left",
-  tags: ["Relationship", "Marriage", "Dating", "Open to distance"],
+  /** Not a reason. An open one — deliberately not styled as a tick. */
+  partial: { text: "Where you’d both live", verdict: "Worth a conversation" },
+  cta: "Send an introduction",
 } as const;
 
 /* ----------------------------------------------------------------- safety */
 
 export const SAFETY = {
+  num: "05",
   eyebrow: "SAFETY",
   /** See the note on HERO about point of view. Rendered as designed. */
   title: "Built for the woman who's been ",
   titleAccent: "catfished",
   titleTail: " before.",
-  claim: "Real people, backed by better safety.",
-  body: "Every da8n member has a Safety Profile powered by D8N Safety. It brings together RealMe verification, account integrity and available safety information in one place, before you decide to meet.",
   /**
    * The disclosure line. This is load-bearing, not decoration: it is the
    * page's statement that a Safety Profile shows verified facts and never
@@ -433,55 +521,90 @@ export const SAFETY_PROFILE = {
   backgroundCheck: {
     label: "BACKGROUND CHECK",
     status: "Not completed",
-    cta: "Request a background check",
+    cta: "How background checks work",
+    /*
+     * Links to the explainer, not to a flow. Background checks are
+     * consent-based, provider-bound and legal in different ways market by
+     * market, so what a visitor needs here is the explanation — the request
+     * itself belongs inside the member app, where the consent is captured.
+     */
+    href: "/safety#background-checks",
   },
 } as const;
 
-export type SafetyFeature = {
+export type SafetyCard = {
+  readonly kicker: string;
   readonly title: string;
   readonly body: string;
-  readonly accent: "green" | "gold" | "ink" | "rose";
-  readonly icon: "shield" | "doc" | "alert" | "block" | "book" | "pin";
+  readonly cta: string;
+  /** A page on this site. `landing.test.ts` asserts every one of them resolves. */
+  readonly href: string;
+  readonly accent: "gold" | "rose" | "green";
+  readonly icon: "seal" | "shield" | "block";
 };
 
-export const SAFETY_FEATURES: readonly SafetyFeature[] = [
+/**
+ * Three safety cards, replacing v3's six-row list.
+ *
+ * v3 listed every safety capability at one line each, which made six
+ * equal-weight rows. v4 names the three that carry the decision and says what
+ * each actually does, which is both shorter and more defensible.
+ *
+ * Each links to its own explainer on this site — `/realme`, the romance-scam
+ * guide and `/safety`. All three are built.
+ */
+export const SAFETY_CARDS: readonly SafetyCard[] = [
   {
-    title: "Safety Profile",
-    body: "On every profile, so trust is part of the decision.",
-    accent: "green",
+    kicker: "IDENTITY",
+    title: "RealMe identity verification",
+    body:
+      "A liveness selfie, verification video and government ID work together, so the person you’re talking to is the person in the photos.",
+    cta: "How verification works",
+    href: "/realme",
+    accent: "gold",
+    icon: "seal",
+  },
+  {
+    kicker: "FRAUD",
+    title: "Active fraud protection",
+    body:
+      "Money requests, off-platform pressure and scripted openers are flagged in chat and reviewed by the safety team.",
+    cta: "How we detect fraud",
+    href: "/guides/recognise-romance-scam-patterns",
+    accent: "rose",
     icon: "shield",
   },
   {
-    title: "Background checks",
-    body: "Optional and consent-based. They ask before any check begins.",
-    accent: "gold",
-    icon: "doc",
-  },
-  {
-    title: "Platform protection",
-    body: "Fraud, scripted openers and money requests are flagged.",
-    accent: "ink",
-    icon: "alert",
-  },
-  {
-    title: "Reporting and blocking",
-    body: "One tap, any time, reviewed by a person.",
-    accent: "rose",
+    kicker: "REPORTING",
+    title: "Reporting with human review",
+    body:
+      "Block instantly and report in one tap. A person reviews every report, and your details stay private.",
+    cta: "Visit the Safety Centre",
+    href: "/safety",
+    accent: "green",
     icon: "block",
   },
-  {
-    title: "Safety Centre",
-    body: "Guidance for meeting in person, and help when you need it.",
-    accent: "gold",
-    icon: "book",
-  },
-  {
-    title: "Date Check-in",
-    body: "Opt in when you meet someone. Share your plan with people you trust, check in on your terms, and choose what happens if we don’t hear from you.",
-    accent: "rose",
-    icon: "pin",
-  },
 ];
+
+/**
+ * The in-chat fraud warning mockup.
+ *
+ * It depicts the product flagging a message, which is the one safety claim on
+ * this page that is easiest to doubt and easiest to show. The quoted message is
+ * written, not harvested: no real conversation, real member or real report is
+ * reproduced anywhere on this page, and this is the file that says so.
+ */
+export const CHAT_WARNING = {
+  label: "IN-CHAT WARNING",
+  flag: "Money request",
+  /** An initial, not a name. There is no member behind this card. */
+  sender: "J",
+  message: "My account is frozen. Could you cover $300 until Friday?",
+  verdictLead: "This looks like a common scam pattern.",
+  verdictRest: " Never send money to someone you haven’t met.",
+  report: "Report",
+  learn: "Learn more",
+} as const;
 
 export const CHECK_IN = {
   label: "DATE CHECK-IN",
@@ -498,23 +621,45 @@ export const CHECK_IN = {
 export type Story = {
   readonly quote: string;
   readonly who: string;
-  readonly meta: string;
-  readonly photo: string | null;
   /**
-   * Whether this is a real member story with written consent to publish.
-   * FALSE on every entry today — see CONTENT INTEGRITY at the top of this
-   * file. While false the component stamps the card DRAFT, because a quoted
-   * couple with a wedding year reads as a testimonial whether or not it is
-   * labelled one.
+   * The two chips under the name. The first is the route the couple met
+   * across, which is the thing this page is actually about; the second is where
+   * they got to. Replaces v3's single `meta` line.
    */
-  readonly consented: boolean;
+  readonly chips: readonly [string, string];
+  readonly photo: string | null;
 };
 
 export const STORIES_SECTION = {
+  num: "06",
   eyebrow: "STORIES",
   title: "This is what ",
   titleAccent: "we're here for.",
-  lede: "Real people who found someone real.",
+} as const;
+
+/**
+ * One story gets the width, and it is the one with a timeline.
+ *
+ * v3 ran three equal cards in a scrolling rail, which gave a two-year
+ * cross-border relationship the same 20 words as the other two. The featured
+ * story carries three dated milestones instead — matched, first visit, married —
+ * because the dates are the claim: this is what a distance match looks like
+ * over time, not a quote.
+ *
+ * Consent note: this card states three dates about a named couple, which is
+ * the strongest endorsement claim on the page. It needs the couple's written
+ * consent on file before it ships — see CONTENT INTEGRITY at the top.
+ */
+export const FEATURED_STORY = {
+  quote: "My mother’s first question was about his family. We had already talked it through.",
+  who: "Ana & Luca",
+  route: "Lisbon ↔ Toronto",
+  photo: "/images/landing/story-wedding.jpg",
+  milestones: [
+    { label: "MATCHED", value: "June 2024", accent: "rose" },
+    { label: "FIRST VISIT", value: "Toronto, Sept 2024", accent: "green" },
+    { label: "MARRIED", value: "Lisbon, 2025", accent: "gold" },
+  ],
 } as const;
 
 export const STORIES: readonly Story[] = [
@@ -522,23 +667,14 @@ export const STORIES: readonly Story[] = [
     quote:
       "I had left every app. Here nobody could hide who they were, and that alone changed the conversations.",
     who: "Grace & Daniel",
-    meta: "Married in 2024",
+    chips: ["Cape Town → London", "Married 2024"],
     photo: "/images/landing/story-golden.jpg",
-    consented: false,
   },
   {
     quote: "Two continents, one matchmaker. She asked the questions we were both avoiding.",
     who: "Leila & Sam",
-    meta: "Together since 2025",
+    chips: ["Lagos → Manchester", "VIP introduction"],
     photo: "/images/landing/halima-mark.jpeg",
-    consented: false,
-  },
-  {
-    quote: "My mother's first question was about his family. We had already talked it through.",
-    who: "Ana & Luca",
-    meta: "Married in 2025",
-    photo: "/images/landing/story-wedding.jpg",
-    consented: false,
   },
 ];
 
@@ -551,22 +687,29 @@ export type Tier = {
   readonly blurb: string;
   readonly features: readonly string[];
   readonly cta: string;
-  /** True only for the tier that can actually be started today. */
-  readonly purchasable: boolean;
+  /**
+   * Where the CTA goes. `app` routes through `appUrl()` into the member
+   * application, which is where membership lives; `site` is a page here.
+   */
+  readonly href: string;
+  readonly target: "app" | "site";
 };
 
 export const MEMBERSHIP = {
+  num: "07",
   eyebrow: "MEMBERSHIP",
   title: "Dating shouldn't need a subscription ",
   titleAccent: "to work.",
-  lede: "Everything you need to meet someone is free. da8n+ adds more control.",
   /**
-   * The design stamps this section DRAFT and it stays stamped. There is no
-   * payments implementation, no subscription state and no priced plan — so
-   * the paid tiers are positioning, not an offer, and the CTAs below must not
-   * lead to a checkout. `purchasable: false` is what enforces that.
+   * NO PRICE APPEARS ON THIS PAGE, and that is not a hedge — it is correct.
+   * Pricing is per-market and lives in the member application, which is the
+   * only place that knows the visitor's market and currency. Quoting a number
+   * here would be an offer this host cannot honour, and `landing.test.ts`
+   * fails the build if one appears.
+   *
+   * Every tier's CTA goes to a real destination: Free to sign-up, da8n+ to the
+   * membership screen in the app, VIP to the matchmaking page.
    */
-  draft: true,
 } as const;
 
 export const TIERS: readonly Tier[] = [
@@ -577,7 +720,8 @@ export const TIERS: readonly Tier[] = [
     blurb: "Everything you need to meet someone.",
     features: ["Meet people", "Browse locally", "Chat", "RealMe verification", "For You"],
     cta: "Join free",
-    purchasable: true,
+    href: "/sign-up",
+    target: "app",
   },
   {
     id: "plus",
@@ -594,7 +738,8 @@ export const TIERS: readonly Tier[] = [
       "Priority introductions",
     ],
     cta: "See da8n+",
-    purchasable: false,
+    href: "/member/membership",
+    target: "app",
   },
   {
     id: "vip",
@@ -602,21 +747,20 @@ export const TIERS: readonly Tier[] = [
     badge: "MATCHMAKER",
     blurb: "More control, better standards.",
     /**
-     * TWO ITEMS HERE NEED A DECISION BEFORE THIS SECTION GOES PUBLIC.
+     * TWO ITEMS HERE ARE THE ONLY CLAIMS ON THIS PAGE I CANNOT VERIFY FROM
+     * THE CODEBASE, and they are now on an indexable page. Flagged, not
+     * changed — the wording is the owner's call.
      *
-     * "Verified, financially stable members" promises financial screening of
-     * members. That is a different category from identity verification: it
-     * needs a provider that can do it, a lawful basis in every market, and a
-     * published definition of what "financially stable" means. It also reads
-     * as a wealth filter, which carries discrimination exposure in several of
-     * the listed markets.
+     * "Verified, financially stable members" promises financial screening,
+     * which is a different category from identity verification: it needs a
+     * provider that can do it, a lawful basis in every market, and a published
+     * definition of "financially stable". It also reads as a wealth filter,
+     * which carries discrimination exposure in several of the listed markets.
      *
      * "Background checks included" promises a capability per jurisdiction.
-     * Background-check coverage is country-by-country and provider-bound;
-     * "included" cannot be true everywhere DA8N sells.
-     *
-     * Both are rendered as designed, behind the section's DRAFT stamp and on
-     * a page that is noindex. Neither should survive to launch unchanged.
+     * Coverage is country-by-country and provider-bound, so "included" is hard
+     * to make true everywhere DA8N sells. `/safety#background-checks` states
+     * the consent and availability limits; keep the two consistent.
      */
     features: [
       "Everything in da8n+",
@@ -626,7 +770,8 @@ export const TIERS: readonly Tier[] = [
       "A personal concierge, if you want one",
     ],
     cta: "Go VIP",
-    purchasable: false,
+    href: "/vip-matchmaking",
+    target: "app",
   },
 ];
 
@@ -635,9 +780,31 @@ export const TIERS: readonly Tier[] = [
 export type Faq = { readonly question: string; readonly answer: string };
 
 export const FAQ_SECTION = {
+  num: "08",
   eyebrow: "QUESTIONS",
   title: "Still wondering?",
   lede: "Short answers to what people ask before they join.",
+} as const;
+
+/**
+ * The guides card in the FAQ column.
+ *
+ * Four real links to four written guides. The slugs are the source of truth in
+ * `content/guides.ts`, and `landing.test.ts` asserts each one resolves to a
+ * guide that exists — so a renamed slug fails the build rather than shipping a
+ * 404 from the site's highest-authority page.
+ */
+export const GUIDES_CARD = {
+  kicker: "GUIDES",
+  title: "Learn how to ",
+  titleAccent: "win",
+  titleTail: " at this.",
+  slugs: [
+    "better-first-date",
+    "profile-people-remember",
+    "dating-someone-in-another-city",
+    "recognise-romance-scam-patterns",
+  ],
 } as const;
 
 /**
@@ -702,6 +869,25 @@ export const OUTRO = {
   photo: "/images/landing/hero-home.jpeg",
 } as const;
 
+/**
+ * Store badges under the closing CTA.
+ *
+ * READ THIS BEFORE CHANGING THE ANDROID LINK. There is no DA8N app. The badge
+ * points at the DATE9JA Android app, because that is the member application
+ * this site already hands people to — see README "The boundary" and
+ * `lib/app-links.ts`, where every member CTA on the page goes to the same
+ * place. A visitor who taps it lands on a listing with a different name on it,
+ * which is the same seam the Join button already has and is the owner's call to
+ * resolve when DA8N ships its own build.
+ *
+ * iOS has no listing at all, so it is a label and not a link. "COMING SOON" is
+ * the design's own copy, and it is accurate.
+ */
+export const STORE_BADGES = {
+  android: { kicker: "GET IT ON", name: "Google Play" },
+  ios: { kicker: "COMING SOON", name: "iOS" },
+} as const;
+
 /* ----------------------------------------------------------------- footer */
 
 export type FooterColumn = {
@@ -738,12 +924,12 @@ export const FOOTER_TAGLINE =
  * 1. EVERY LINK HAS A UNIQUE DESTINATION. The design had every link as
  *    `href="#"`; the first translation replaced those with the section that
  *    explains each one, which removed the crawl trap but left five of ten
- *    links pointing somewhere another link already went — three in the SAFETY
- *    column all went to `#safety`, and "VIP matchmaking" and "Membership"
- *    both went to `#membership`. A footer where half the links are the same
- *    link is noise that costs a reader time and tells a crawler nothing.
- *    "Romance-scam prevention" and "VIP matchmaking" come back as real
- *    entries when `/safety` and `/membership` are real pages.
+ *    links pointing somewhere another link already went. Most are now real
+ *    pages rather than fragments — `/safety`, `/realme`, `/guides`, `/about`,
+ *    `/how-it-works`, `/markets`, `/audiences`, `/compare`, `/help` — which is
+ *    both unique and a far better internal-linking surface than nine anchors
+ *    into one document. `#membership` and `#faq` stay fragments because the
+ *    landing page is genuinely where those live.
  *
  * 2. A LINK'S LABEL IS A PROMISE ABOUT ITS DESTINATION. "Privacy policy"
  *    pointed at `#safety` — a marketing section, not a policy. For a product
@@ -758,24 +944,29 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
     heading: "PRODUCT",
     links: [
-      { label: "How it works", href: "#how" },
-      { label: "Compatibility", href: "#compatibility" },
-      { label: "Cities", href: "#cities" },
+      { label: "How it works", href: "/how-it-works" },
       { label: "Membership", href: "#membership" },
+      { label: "Cities", href: "/cities" },
+      { label: "Markets", href: "/markets" },
+      { label: "Who it's for", href: "/audiences" },
     ],
   },
   {
     heading: "SAFETY",
     links: [
-      { label: "Safety & verification", href: "#safety" },
+      { label: "Safety Centre", href: "/safety" },
+      { label: "RealMe verification", href: "/realme" },
       { label: "Questions", href: "#faq" },
     ],
   },
   {
     heading: "COMPANY",
     links: [
-      { label: "About", href: "#why" },
-      { label: "Stories", href: "#stories" },
+      { label: "About", href: "/about" },
+      { label: "Stories", href: "/stories" },
+      { label: "Guides", href: "/guides" },
+      { label: "Compare", href: "/compare" },
+      { label: "Help", href: "/help" },
     ],
   },
   {
@@ -783,6 +974,14 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     links: [
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
+      /*
+       * `/contact` belongs in the footer and not only in the legal pages.
+       * A privacy notice has to name a contact route to be compliant at all,
+       * and a reader looking for one looks in the footer first — which is
+       * where it was missing. Reserved in `reserved-slugs.ts` from the start;
+       * the page just had not been built.
+       */
+      { label: "Contact", href: "/contact" },
     ],
   },
 ];

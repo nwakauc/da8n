@@ -7,6 +7,10 @@ import { cityPath } from "@/lib/routing";
  * "Nearby" list and the `/cities` index, so the markup and the rules below
  * exist once rather than three times.
  *
+ * `regionShort` wins over `region` where a city has one: "New South Wales"
+ * wrapped onto a second line in the chip and made that card taller than its
+ * neighbours, and "NSW" is the form people use anyway.
+ *
  * `region` is suppressed when it repeats the city name. Several catalog
  * entries are city-states or eponymous regions — Dubai is in the emirate of
  * Dubai, Abu Dhabi in the emirate of Abu Dhabi, Lagos in Lagos State — and
@@ -16,7 +20,7 @@ import { cityPath } from "@/lib/routing";
  * "Lagos State" too.
  */
 export function regionLabel(city: City): string | null {
-  const region = city.region?.trim();
+  const region = (city.regionShort ?? city.region)?.trim();
   if (!region) return null;
   const name = city.name.toLowerCase();
   const value = region.toLowerCase();

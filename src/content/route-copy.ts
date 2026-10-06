@@ -1,4 +1,5 @@
 import type { Market, MarketStatus } from "./markets";
+import { marketInProse } from "./markets";
 
 /**
  * Copy for the market and city routes.
@@ -26,9 +27,7 @@ import type { Market, MarketStatus } from "./markets";
  *   - claiming the product is live somewhere it is not
  *
  * What is left is plenty: what DA8N is, how it works, what the city or market
- * is an entry point to, honest availability, and a route onward. A page can be
- * designed and still admit its editorial copy is unwritten — `EDITORIAL_PENDING`
- * is how it says so without printing a status enum.
+ * is an entry point to, honest availability, and a route onward.
  * ---------------------------------------------------------------------------
  */
 
@@ -80,11 +79,17 @@ export const MARKET_COPY = {
   kicker: "MARKET",
   /** `intro(market)` is the page lede. Availability is appended by the page. */
   intro: (market: Market) =>
-    `DA8N is one global network with a local front door. ${market.countryName} is one of them — ` +
+    `DA8N is one global network with a local front door. ${marketInProse(market)} is one of them — ` +
     `meet people here, back home, or anywhere you are open to.`,
   citiesHeading: "Cities",
+  /*
+   * The demonym, not the country name. This read "The Australia cities DA8N
+   * has a page for", because a country name cannot be used attributively in
+   * English. `markets.ts` carries a `demonym` for exactly this and nothing was
+   * using it.
+   */
   citiesLede: (market: Market) =>
-    `The ${market.countryName} cities DA8N has a page for. Where you live, where you are from ` +
+    `${market.demonym} cities DA8N has a page for. Where you live, where you are from ` +
     `and where you are open to meeting are three different things, and DA8N treats them that way.`,
   elsewhereHeading: "Somewhere else",
   elsewhereLede: "DA8N is one network. These are its other front doors.",
@@ -104,19 +109,6 @@ export const CITY_COPY = {
       ? `Other ${countryName} cities worth looking at.`
       : "Other cities worth looking at.",
 } as const;
-
-/**
- * The honest-state line. Every market and city route carries it while its
- * editorial copy is unwritten, which is also why every one of them is
- * `indexable: false` — the quality floor in `lib/indexability.ts` would block
- * them anyway.
- *
- * Delete this from a page at the same time as writing that page's real copy,
- * not before.
- */
-export const EDITORIAL_PENDING =
-  "We are still writing this page. What is here is accurate; there is simply more to come — " +
-  "how dating works locally, what to expect, and where people meet.";
 
 /** Shared CTA copy, so the landing page and these routes do not drift. */
 export const JOIN_CTA = {

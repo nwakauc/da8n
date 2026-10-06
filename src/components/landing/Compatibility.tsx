@@ -1,94 +1,127 @@
 import { ImageSlot } from "../ImageSlot";
-import { Bolt, Check, RealMeSeal } from "../icons";
-import { COMPAT, EXAMPLE_PROFILES, READY } from "@/content/landing";
+import { Check, RealMeSeal } from "../icons";
+import { Eyebrow } from "./Eyebrow";
+import { COMPAT, EXAMPLE_PROFILES } from "@/content/landing";
+import { JOIN_URL } from "@/lib/app-links";
 
 /**
- * Compatibility, with the Ready panel alongside it.
+ * "For You" — two members and the reasons between them.
  *
- * `#ready` is an anchor the primary nav links to, so it has to be an id on
- * something real — it lives on the Ready panel rather than on a wrapper, so
- * the jump lands on the heading a visitor came to read.
+ * WHY THE SHAPE CHANGED. v3 put one photograph beside a list of five reasons,
+ * which reads as a profile with annotations: the list looks like an assessment
+ * OF that person. Compatibility is a statement about a pair, so v4 shows both
+ * people and puts the reasons in the middle, which is the only arrangement
+ * where "both want a serious relationship" is obviously about the two of them.
  *
- * The "Why you may connect" list is signal, not score: five plain statements,
- * no percentage, no ranking. That is the honest shape for compatibility — a
- * number implies a precision the model does not have, and invites members to
- * treat it as a verdict on a person.
+ * Still no percentage and still no ranking. Five plain statements — a number
+ * implies a precision the model does not have and invites a member to treat it
+ * as a verdict on a person.
+ *
+ * `COMPAT.partial` is the half of this the design gets right and most products
+ * hide: one dimension where the two have NOT already agreed, shown as an open
+ * question with a ring instead of a tick. A list of five ticks and nothing else
+ * is a sales pitch; the sixth row is what makes the other five believable.
+ *
  */
 export function Compatibility() {
-  const { maya } = EXAMPLE_PROFILES;
+  const { maya, marcus } = EXAMPLE_PROFILES;
 
   return (
     <section id="compatibility" className="sec compat" aria-labelledby="compat-title">
       <div className="sec__in">
-        <div className="compat__shot">
-          <ImageSlot
-            src={maya.photo}
-            alt=""
-            placeholder="Member photo"
-            className="slot-fill"
-            sizes="(min-width: 1100px) 400px, (min-width: 760px) 50vw, 100vw"
-          />
-          <span className="compat__online">
-            <span className="dot dot--ring" />
-            Online now
-          </span>
-          <div className="compat__who">
-            <b>
-              {maya.name}
-              <RealMeSeal size={20} label="RealMe verified" />
-            </b>
-            <span>{maya.where}</span>
-            <span className="green">{maya.intent}</span>
-          </div>
-        </div>
-
-        <div className="compat__col">
-          <span className="eyebrow">{COMPAT.eyebrow}</span>
+        <div className="compat__head">
+          <Eyebrow num={COMPAT.num}>{COMPAT.eyebrow}</Eyebrow>
           <h2 id="compat-title" className="compat__title">
             {COMPAT.title}
             <span className="rose">{COMPAT.titleAccent}</span>
           </h2>
-          <p>{COMPAT.lede}</p>
+        </div>
 
-          <div className="panel">
-            <b>{COMPAT.panelTitle}</b>
-            <ul className="ticks">
+        <div className="match">
+          <Polaroid
+            className="match__card match__card--left"
+            photo={maya.photo}
+            name={maya.name}
+            where={maya.where}
+          />
+
+          <div className="match__why">
+            <span className="match__pair">
+              {maya.firstName}
+              <span className="match__heart" aria-hidden="true">
+                ♥
+              </span>
+              {marcus.firstName}
+            </span>
+            <b className="match__h">{COMPAT.panelTitle}</b>
+
+            <ul className="match__list">
               {COMPAT.reasons.map((reason) => (
                 <li key={reason}>
-                  <span className="tick tick--sm">
-                    <Check size={11} />
+                  <span className="tick">
+                    <Check size={12} />
                   </span>
                   {reason}
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
 
-        <div id="ready" className="ready">
-          <h3>
-            {READY.title}
-            <span className="rose">{READY.titleAccent}</span>
-          </h3>
-          <p>{READY.body}</p>
+            <div className="match__open">
+              <span className="ring ring--gold" aria-hidden="true" />
+              <span>{COMPAT.partial.text}</span>
+              <b>{COMPAT.partial.verdict}</b>
+            </div>
 
-          <div className="ready__state">
-            <span className="ready__bolt">
-              <Bolt size={22} />
-            </span>
-            <span className="ready__meta">
-              <b>{READY.stateLabel}</b>
-              <span className="ready__left">{READY.stateLeft}</span>
-            </span>
+            <a href={JOIN_URL()} className="match__cta">
+              {COMPAT.cta}
+            </a>
           </div>
 
-          <div className="ready__tags">
-            {READY.tags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
-          </div>
+          <Polaroid
+            className="match__card match__card--right"
+            photo={marcus.photo}
+            name={marcus.name}
+            where={marcus.where}
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * The tilted member card. `rotate` lives in CSS per side, not here, so the
+ * component has no opinion about which way it leans.
+ */
+function Polaroid({
+  className,
+  photo,
+  name,
+  where,
+}: {
+  readonly className: string;
+  readonly photo: string;
+  readonly name: string;
+  readonly where: string;
+}) {
+  return (
+    <figure className={className}>
+      <div className="match__media">
+        <ImageSlot
+          src={photo}
+          alt=""
+          placeholder="Member photo"
+          className="slot-fill"
+          sizes="(min-width: 1000px) 300px, 45vw"
+        />
+      </div>
+      <figcaption>
+        <b>
+          {name}
+          <RealMeSeal size={20} label="RealMe verified" />
+        </b>
+        <span>{where}</span>
+      </figcaption>
+    </figure>
   );
 }

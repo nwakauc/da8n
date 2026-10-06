@@ -20,26 +20,30 @@ const DESCRIPTION =
 /**
  * DA8N home.
  *
- * `indexable: false`, still. The design has landed, but three things have to
- * be true before this page is allowed into an index, and none of them is a
- * code change:
+ * `indexable: true` as of 2026-10-05. It was false while three things were
+ * outstanding; two of them are now decided and the third is unchanged:
  *
- *   1. `STORIES` carries real, consented testimonials instead of placeholders.
- *   2. The membership section's DRAFT claims are resolved — in particular the
- *      VIP tier's financial-screening and background-check promises.
- *   3. `DA8N_SEO_ENABLED=true` is set on production, which is the site-wide
- *      switch in `robots.ts`.
+ *   1. STORIES — the owner confirms these are real members. Consent for each
+ *      published quote is a content task tracked in `content/landing.ts`, not
+ *      a code gate.
+ *   2. MEMBERSHIP — the tiers are real and every CTA now goes to a real page.
+ *      Two VIP lines still cannot be checked from this codebase (financial
+ *      screening, background checks "included") and are flagged at the point
+ *      of definition; they are claims, not placeholders.
+ *   3. `DA8N_SEO_ENABLED=true` on production is STILL REQUIRED, and it is the
+ *      site-wide switch in `robots.ts`. Nothing here is crawlable until it is
+ *      set — this flag says the page deserves indexing, that one says when.
  *
- * Until then the page renders in full, is fast, is accessible, and is not
- * indexed. Those are not in tension: the fail-closed default means shipping
- * the design costs nothing in indexation risk.
+ * Every link on this page resolves to a page that exists; `landing.test.ts`
+ * asserts it, because an indexable page that links to 404s is worse than a
+ * noindex one that does not.
  */
 export const metadata: Metadata = buildPageMetadata({
   title: "DA8N — meet someone real, anywhere",
   description: DESCRIPTION,
   path: "/",
   absoluteTitle: true,
-  indexable: false,
+  indexable: true,
 });
 
 export default function HomePage() {
@@ -68,8 +72,15 @@ export default function HomePage() {
       <CityMarquee />
       <WhyDa8n />
       <HowItWorks />
-      <Cities />
+      {/*
+        Compatibility before Cities, which is v4's order and not an accident.
+        "For You" finishes the argument How-it-works starts — you set
+        intentions, you get verified, here is what an introduction actually
+        looks like — and the city grid is the next question, not part of that
+        answer. v3 had the grid cutting between the two.
+      */}
       <Compatibility />
+      <Cities />
       <Safety />
       <Stories />
       <Membership />

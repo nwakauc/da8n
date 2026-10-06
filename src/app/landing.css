@@ -1,6 +1,20 @@
 /*
- * DA8N landing page — styles translated from "DA8N Landing v3"
- * (claude.ai/design project b10df277, imported 2026-10-04).
+ * DA8N landing page — styles translated from "DA8N Landing v4.dc.html"
+ * (claude.ai/design project e15220c2, "DA8N combined website design",
+ * imported 2026-10-05; v3 was imported from project b10df277 on 2026-10-04).
+ *
+ * WHAT v4 CHANGED, since the diff is not obvious from the rules below:
+ *   - the eight sections are numbered, and the numbers are visible (`.eyebrow__num`)
+ *   - the city marquee inverts to a dark, rotated ribbon overlapping the hero
+ *   - how-it-works drops to four steps, numbered instead of dotted, and gains
+ *     a Ready screen; `#ready` moves here
+ *   - compatibility becomes "03 FOR YOU": two members with the reasons between
+ *     them, plus one open question, and it now sits BEFORE the city grid
+ *   - safety leads with three capability cards and shows an in-chat fraud warning
+ *   - stories lose the scrolling rail for one featured story plus two cards
+ *   - new: the guides card in the FAQ column, and the store badges in the outro
+ *   - gone: the hero's handwritten script line, the membership lede, the
+ *     safety claim/body paragraphs, the cities explanatory sentence
  *
  * WHY THIS IS CSS AND NOT INLINE STYLE
  * The source design computes its responsive values in JavaScript from
@@ -47,6 +61,29 @@
   color: var(--da8n-muted);
   margin: 0;
 }
+/*
+ * The section number. v4 counts the eight sections, so the eyebrow is now
+ * "01  WHY DA8N". The gap is `margin-right` on the number rather than a flex
+ * gap because the eyebrow stays an inline run of text — several of them wrap,
+ * and a flex row would stop the label wrapping under its own number.
+ */
+.eyebrow__num {
+  color: var(--da8n-rose);
+  margin-right: 12px;
+  letter-spacing: 0.1em;
+}
+
+/*
+ * A zero-height jump target. Used where the nav anchors at a point inside a
+ * section rather than at the section box itself (`#ready`). `scroll-margin-top`
+ * clears the sticky header, which is the whole reason it is an element and not
+ * an id on whatever happens to be nearby.
+ */
+.anchor {
+  display: block;
+  height: 0;
+  scroll-margin-top: 96px;
+}
 
 .sec__head {
   display: flex;
@@ -77,7 +114,6 @@
   text-wrap: pretty;
   flex: 1 1 300px;
 }
-
 
 /* ------------------------------------------------------------ image slot */
 /*
@@ -324,6 +360,11 @@
 .dot--ring {
   box-shadow: 0 0 0 3px rgba(13, 122, 67, 0.18);
 }
+/* The warning dot on the in-chat fraud card. Paired with the word "Money
+   request" beside it — colour is never the only carrier of the state. */
+.dot--rose {
+  background: var(--da8n-rose);
+}
 .pcard__cap {
   position: relative;
   padding: 14px 4px 0;
@@ -367,12 +408,6 @@
   padding-top: 11px;
   border-top: 1px solid var(--da8n-line-warm);
   text-wrap: pretty;
-}
-.pcard__example {
-  font: 700 11px var(--font-manrope), sans-serif;
-  letter-spacing: 0.1em;
-  color: var(--da8n-faint);
-  text-transform: uppercase;
 }
 
 /* --------------------------------------------------------- powered by D8N */
@@ -468,24 +503,44 @@
 
 /* ---------------------------------------------------------- city marquee */
 
+/*
+ * v4 turns the band into a dark, slightly rotated ribbon that overlaps the
+ * bottom of the hero.
+ *
+ * THE OUTER ELEMENT EXISTS TO CONTAIN THE ROTATION. A rotated child is wider
+ * than its own box, and the band is deliberately bled past both gutters, so
+ * without an un-rotated `overflow: hidden` parent the document gains horizontal
+ * scroll at every viewport width. The negative `margin-top` is what lifts it
+ * over the hero; `z-index` puts it above the hero's bottom scrim.
+ */
 .marquee {
+  position: relative;
+  z-index: 4;
+  margin-top: -30px;
+  padding: 6px 0 26px;
   overflow: hidden;
-  padding: 30px 0;
-  border-top: 1px solid #eadfcd;
-  border-bottom: 1px solid #eadfcd;
-  background: var(--da8n-cream-lift);
+}
+.marquee__band {
+  margin: 0 -40px;
+  padding: 20px 0;
+  overflow: hidden;
+  transform: rotate(-1.6deg);
+  background: var(--da8n-ink);
+  border-top: 3px solid var(--da8n-rose);
+  border-bottom: 3px solid var(--da8n-rose);
+  box-shadow: 0 18px 30px -18px rgba(35, 28, 23, 0.6);
 }
 .marquee__row {
   display: flex;
   align-items: center;
   width: max-content;
   white-space: nowrap;
-  font: 800 clamp(36px, 4.6vw, 60px) / 1 var(--font-bricolage), sans-serif;
+  font: 800 clamp(28px, 3.4vw, 46px) / 1 var(--font-bricolage), sans-serif;
   letter-spacing: -0.03em;
 }
 @media (prefers-reduced-motion: no-preference) {
   .marquee__row {
-    animation: da8n-tick 70s linear infinite;
+    animation: da8n-tick 60s linear infinite;
   }
 }
 .marquee__city {
@@ -557,6 +612,21 @@
   flex-direction: column;
   gap: 10px;
   box-shadow: 6px 6px 0 var(--accent);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+/*
+ * The offset-shadow lift, v4's one interaction on an otherwise static card:
+ * the card steps up-left and its shadow grows, which is the paper-and-ink
+ * metaphor the whole design runs on. Held behind the motion query because it is
+ * decorative — the card is not a link and nothing depends on seeing it move.
+ */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pillar:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--accent);
+  }
 }
 .pillar__top {
   display: flex;
@@ -644,9 +714,9 @@
   all: unset;
   cursor: pointer;
   display: grid;
-  grid-template-columns: 10px minmax(0, 1fr);
-  gap: 4px 20px;
-  padding: 14px 0;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 4px 14px;
+  padding: 16px 0;
   border-top: 1px solid var(--da8n-line-strong);
 }
 /*
@@ -660,12 +730,15 @@
   border-radius: 4px;
 }
 
-.step__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  margin-top: 9px;
+/*
+ * The visible "01"–"04". It replaces v3's coloured dot, which told a reader
+ * nothing: the number is the order, and the order is the content of this
+ * section. `line-height: 1.6` sits it on the same optical baseline as the step
+ * label beside it, which is set in a different family at a larger size.
+ */
+.step__num {
+  font: 800 15px/1.6 var(--font-bricolage), sans-serif;
+  color: var(--accent);
 }
 .step__body {
   display: flex;
@@ -690,7 +763,9 @@
 .step__detail span {
   display: inline-block;
   padding-bottom: 8px;
-  border-bottom: 2px solid var(--da8n-ink);
+  /* The rule under the detail takes the step's own colour, as the design has
+     it — so the underline is the fourth place the active step is marked. */
+  border-bottom: 2px solid var(--accent);
   font: 500 15px/1.5 var(--font-manrope), sans-serif;
   color: var(--da8n-muted);
   text-wrap: pretty;
@@ -873,18 +948,6 @@
   border: 1px solid var(--da8n-line-warm);
   color: var(--da8n-ink-soft);
 }
-.phone__rowhead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.phone__rowhead b {
-  font: 800 19px var(--font-bricolage), sans-serif;
-}
-.phone__rowhead span {
-  font: 700 11.5px var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
-}
 .phone__hero {
   position: relative;
   flex: 1;
@@ -913,52 +976,71 @@
 .phone__heroCap span {
   font: 600 12px var(--font-manrope), sans-serif;
 }
-.phone__why {
-  background: #fff;
-  border: 1px solid var(--da8n-line-warm);
-  border-radius: 14px;
-  padding: 11px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.phone__why b {
-  font: 800 12px var(--font-manrope), sans-serif;
-  color: var(--da8n-green);
-}
-.phone__why span {
-  font: 600 12px/1.35 var(--font-manrope), sans-serif;
-  color: var(--da8n-ink-soft);
-}
 .phone__note {
   font: 600 12.5px/1.45 var(--font-manrope), sans-serif;
   color: var(--da8n-muted);
 }
-.phone__id {
+.phone__h--sm {
+  font-size: 17px;
+}
+.phone__checks {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  background: #fff;
-  border: 1px solid var(--da8n-line-warm);
+  flex-direction: column;
 }
-.phone__id .slot-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  flex: none;
-}
+/*
+ * v4 moves the three RealMe rows off cards and onto rules, which is what lets
+ * all three sit under a full-height photograph in a 540px frame.
+ */
 .phone__check {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 11px 13px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid var(--da8n-line-warm);
-  font: 600 13px var(--font-manrope), sans-serif;
+  padding: 10px 2px;
+  border-top: 1px solid #efe5d6;
+  font: 700 12.5px var(--font-manrope), sans-serif;
   color: var(--da8n-ink);
+}
+/*
+ * The empty ring is always drawn; the tick inside it scales in when this panel
+ * becomes active, one row at a time via `--delay`.
+ *
+ * THE SEQUENCE IS THE POINT of the screen — it shows verification completing
+ * rather than three pre-ticked boxes — but it is still decoration, so under
+ * `prefers-reduced-motion: reduce` the ticks are simply present from the start.
+ * Doing it the other way round (animate by default, disable on reduce) would
+ * leave all three invisible for anyone who asked for less motion, because the
+ * animation is what reveals them.
+ */
+.phone__ring {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px #d8cbb8;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.phone__tick {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--da8n-green);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .phone__tick {
+    transform: scale(0);
+    opacity: 0;
+    transition:
+      transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) var(--delay),
+      opacity 0.2s var(--delay);
+  }
+  .how__panel[data-on="true"] .phone__tick {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 .tick {
   width: 18px;
@@ -972,52 +1054,76 @@
   place-items: center;
   flex: none;
 }
-.phone__msg {
-  padding: 12px 14px;
-  border-radius: 16px 16px 16px 4px;
+/* The Ready screen — step 04's phone. Shown in its on state, which is the
+   state the step is describing. */
+.ready__orb {
+  align-self: center;
+  margin: 26px 0 8px;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: var(--da8n-rose);
+  display: grid;
+  place-items: center;
+  /* Two concentric haloes rather than a blur: the design's own treatment, and
+     it survives being screenshotted at any scale. */
+  box-shadow:
+    0 0 0 12px #ffe3e8,
+    0 0 0 24px #fff4f6;
+}
+.ready__title {
+  text-align: center;
+  font: 800 23px var(--font-bricolage), sans-serif;
+  margin-top: 18px;
+}
+.ready__sub {
+  text-align: center;
+  font: 800 13px var(--font-manrope), sans-serif;
+  color: var(--da8n-rose-ink);
+  margin-top: -6px;
+}
+.ready__tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.ready__tags span {
+  padding: 6px 11px;
+  border-radius: 999px;
   background: #fff;
-  border: 1px solid var(--da8n-line-warm);
-  font: 500 13px/1.5 var(--font-manrope), sans-serif;
-  color: var(--da8n-ink-soft);
-}
-.phone__sent {
+  border: 1px solid #f1d0d7;
   font: 700 11.5px var(--font-manrope), sans-serif;
-  color: var(--da8n-faint);
-  align-self: flex-end;
 }
-.phone__open {
+.ready__row {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 14px;
   border-radius: 14px;
-  background: var(--da8n-blush-deep);
-  border: 1px solid #ffc2cd;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.phone__open b {
+  border: 1.5px solid var(--da8n-rose);
+  background: #fff0f2;
   font: 800 13.5px var(--font-manrope), sans-serif;
-  color: var(--da8n-rose-ink);
+  color: var(--da8n-ink);
 }
-.phone__open span {
-  font: 600 12.5px var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
-}
-.phone__avatarRow {
+.ready__track {
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--da8n-rose);
+  padding: 3px;
   display: flex;
-  align-items: center;
-  gap: 9px;
-}
-.phone__avatarRow .slot-wrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
   flex: none;
 }
-.phone__avatarRow b {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font: 800 15px var(--font-bricolage), sans-serif;
+.ready__track i {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transform: translateX(18px);
 }
 
 /* ----------------------------------------------------------------- cities */
@@ -1179,10 +1285,12 @@
   gap: 24px clamp(24px, 4vw, 56px);
   align-items: center;
 }
-.places p {
+.places__title {
   margin: 0;
-  font: 700 clamp(20px, 2.2vw, 26px) / 1.25 var(--font-bricolage), sans-serif;
-  text-wrap: pretty;
+  min-width: 0;
+  font: 800 clamp(26px, 3vw, 40px) / 1.05 var(--font-bricolage), sans-serif;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 .places__who {
   display: flex;
@@ -1213,204 +1321,205 @@
 .places__kv dd.green {
   color: var(--da8n-green);
 }
-
-/* ---------------------------------------------------------- compatibility */
+/* ------------------------------------------------------- for you (compat) */
 
 .compat {
   background: #fff;
   border-top: 1px solid var(--da8n-line);
 }
 .compat .sec__in {
-  --pad-y: clamp(72px, 9vw, 120px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: clamp(24px, 3vw, 40px);
-  align-items: stretch;
+  --pad-y: clamp(72px, 9vw, 128px);
 }
-@media (min-width: 760px) {
-  .compat .sec__in {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (min-width: 1100px) {
-  .compat .sec__in {
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr) minmax(0, 0.9fr);
-  }
-}
-.compat__shot {
-  position: relative;
-  min-height: 360px;
-  border-radius: 26px;
-  overflow: hidden;
-}
-@media (min-width: 560px) {
-  .compat__shot {
-    min-height: 440px;
-  }
-}
-.compat__online {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: #fff;
-  border-radius: 999px;
-  padding: 7px 13px 7px 10px;
-  font: 700 13px var(--font-manrope), sans-serif;
-  color: var(--da8n-ink);
-  pointer-events: none;
-}
-.compat__who {
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
-  background: #fff;
-  border-radius: 18px;
-  padding: 14px 16px;
+.compat__head {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  pointer-events: none;
-  box-shadow: 0 12px 28px -12px rgba(20, 15, 11, 0.4);
-}
-.compat__who b {
-  display: flex;
   align-items: center;
-  gap: 6px;
-  font: 800 21px/1.1 var(--font-bricolage), sans-serif;
-}
-.compat__who span {
-  font: 600 14px var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
-}
-.compat__who .green {
-  font-weight: 700;
-  color: var(--da8n-green);
-}
-.compat__col {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  margin-bottom: clamp(44px, 5vw, 72px);
 }
 .compat__title {
   margin: 0;
+  max-width: 14em;
   font-weight: 800;
-  font-size: clamp(32px, 3.6vw, 48px);
-  line-height: 1.04;
-  letter-spacing: -0.03em;
+  font-size: clamp(34px, 4.8vw, 62px);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
-.compat__col > p {
-  margin: 0;
-  font: 500 16.5px/1.55 var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
-  max-width: 30em;
-  text-wrap: pretty;
+
+/*
+ * The three-up match layout: two tilted member cards with the reasons between
+ * them.
+ *
+ * ORDER IS SET IN CSS, NOT IN THE MARKUP, and that is deliberate. The DOM order
+ * is Maya, reasons, Marcus — which is the reading order the content wants and
+ * the order a screen reader and a crawler get. Below 1000px three columns do not
+ * fit, so the two cards pair up on one row and the reasons panel drops under
+ * them full-width. `order` does that without touching the document.
+ */
+.match {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 3vw, 44px);
+  align-items: center;
+  max-width: 1180px;
+  margin: 0 auto;
 }
-.panel {
+.match__why {
+  order: 3;
+  grid-column: 1 / -1;
+  min-width: 0;
   background: #fff;
-  border: 1px solid var(--da8n-line);
-  border-radius: 20px;
-  padding: 20px 22px;
+  border: 2px solid var(--da8n-ink);
+  border-radius: 22px;
+  padding: clamp(22px, 3vw, 32px);
+  box-shadow: 6px 6px 0 var(--da8n-green);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
 }
-.panel > b {
-  display: block;
+@media (min-width: 1000px) {
+  .match {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+  }
+  .match__why {
+    order: 0;
+    grid-column: auto;
+  }
+}
+
+.match__card {
+  margin: 0;
+  background: #fff;
+  border: 2px solid var(--da8n-ink);
+  border-radius: 14px;
+  padding: 10px 10px 16px;
+  transition: transform 0.3s ease;
+}
+.match__card--left {
+  box-shadow: 6px 6px 0 var(--da8n-rose);
+  transform: rotate(-2.5deg);
+}
+.match__card--right {
+  box-shadow: 6px 6px 0 var(--da8n-gold);
+  transform: rotate(2.5deg);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .match__card:hover {
+    transform: rotate(0deg) translateY(-6px);
+  }
+}
+.match__media {
+  aspect-ratio: 4 / 5;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.match__card figcaption {
+  padding: 14px 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.match__card figcaption b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 800 clamp(18px, 2vw, 21px) / 1.1 var(--font-bricolage), sans-serif;
+}
+.match__card figcaption span {
+  font: 600 14px var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+}
+
+.match__pair {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 6px;
-  font: 800 17px var(--font-bricolage), sans-serif;
+  font: 800 12px var(--font-manrope), sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--da8n-muted);
 }
-.ticks {
+.match__heart {
+  color: var(--da8n-rose);
+  font-size: 16px;
+}
+.match__h {
+  text-align: center;
+  font: 800 clamp(22px, 2.2vw, 26px) / 1.15 var(--font-bricolage), sans-serif;
+  margin-bottom: 10px;
+}
+.match__list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-.ticks li {
+.match__list li {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 0;
-  font: 600 15.5px/1.4 var(--font-manrope), sans-serif;
+  padding: 10px 0;
+  border-top: 1px solid #f0e6d8;
+  font: 600 16px/1.4 var(--font-manrope), sans-serif;
   color: var(--da8n-ink-soft);
 }
-.tick--sm {
-  width: 20px;
-  height: 20px;
+.match__list .tick {
+  width: 22px;
+  height: 22px;
 }
-
-.ready {
-  min-width: 0;
-  background: var(--da8n-blush-deep);
-  border-radius: 26px;
-  padding: clamp(24px, 3vw, 32px);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  justify-content: center;
-}
-@media (min-width: 760px) and (max-width: 1099.98px) {
-  .ready {
-    grid-column: 1 / -1;
-  }
-}
-.ready h3 {
-  margin: 0;
-  font-weight: 800;
-  font-size: clamp(24px, 2.4vw, 30px);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-}
-.ready p {
-  margin: 0;
-  font: 500 15.5px/1.55 var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
-  text-wrap: pretty;
-}
-.ready__state {
+/*
+ * The open question. A ring, not a tick, and a gold "worth a conversation"
+ * instead of a green statement — because this is the one dimension where the
+ * two have not already agreed. Five ticks and nothing else is a sales pitch;
+ * this row is what makes the five believable.
+ */
+.match__open {
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #fbf3e2;
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: #fff;
-  border: 1.5px solid #ffc2cd;
-  border-radius: 18px;
-  padding: 16px 18px;
-}
-.ready__bolt {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 55%),
-    var(--da8n-rose);
-  display: grid;
-  place-items: center;
-  flex: none;
-}
-.ready__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.ready__state b {
-  font: 800 18px var(--font-bricolage), sans-serif;
-}
-.ready__left {
-  font: 700 14px var(--font-manrope), sans-serif;
-  color: var(--da8n-rose-ink);
-}
-.ready__tags {
-  display: flex;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 8px;
+  font: 700 15px/1.4 var(--font-manrope), sans-serif;
+  color: var(--da8n-ink-soft);
 }
-.ready__tags span {
-  padding: 9px 15px;
+.match__open > span:last-of-type {
+  flex: 1 1 120px;
+}
+.match__open b {
+  font: 800 13px var(--font-manrope), sans-serif;
+  color: #8a5a00;
+}
+.match__cta {
+  margin-top: 16px;
+  text-align: center;
+  padding: 16px;
   border-radius: 999px;
-  background: #fff;
-  border: 1px solid #f1d0d7;
-  font: 700 14px var(--font-manrope), sans-serif;
-  color: var(--da8n-ink);
+  background: var(--da8n-rose);
+  color: #fff;
+  /* 16px/800 is 12pt bold — below the 14pt "large text" threshold, so white on
+     rose would be held to 4.5:1 and fail. The ink border and offset shadow are
+     what carry the affordance here, so the fill is allowed to sit under a
+     darker ink rule; see the note on `.btn--primary` in globals.css. */
+  font: 800 17px var(--font-manrope), sans-serif;
+  border: 2px solid var(--da8n-ink);
+  box-shadow: 4px 4px 0 var(--da8n-ink);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.match__cta:hover {
+  color: #fff;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--da8n-ink);
 }
 
 /* ----------------------------------------------------------------- safety */
@@ -1438,18 +1547,89 @@
   line-height: 1.03;
   letter-spacing: -0.035em;
 }
-.safety__claim {
+
+/*
+ * Three capability cards, in the design's card idiom — ink rule, offset shadow
+ * in the card's own accent, lift on hover. Same treatment as `.pillar`, which is
+ * the point: these are the safety counterpart of the four reasons at the top of
+ * the page, and the page should say so visually.
+ */
+.scards {
+  list-style: none;
   margin: 0;
-  font: 700 clamp(19px, 2vw, 22px) / 1.4 var(--font-manrope), sans-serif;
-  color: var(--da8n-ink);
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(18px, 2.2vw, 24px);
 }
-.safety__body {
-  margin: 0;
-  font: 500 17px/1.6 var(--font-manrope), sans-serif;
+@media (min-width: 640px) {
+  .scards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1000px) {
+  .scards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.scard {
+  min-width: 0;
+  height: 100%;
+  background: #fff;
+  border: 2px solid var(--da8n-ink);
+  border-radius: 22px;
+  padding: clamp(22px, 2.4vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 6px 6px 0 var(--accent);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .scard:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--accent);
+  }
+}
+.scard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.scard__kicker {
+  font: 800 12px var(--font-manrope), sans-serif;
+  letter-spacing: 0.12em;
   color: var(--da8n-muted);
-  max-width: 40em;
+}
+.scard .orb--md {
+  width: 42px;
+  height: 42px;
+}
+.scard h3 {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(21px, 2.2vw, 24px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.scard p {
+  margin: 0;
+  /* `flex: 1` is what aligns the three CTAs with each other across cards of
+     different copy lengths. */
+  flex: 1;
+  font: 500 15.5px/1.6 var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
   text-wrap: pretty;
 }
+.scard__link {
+  font: 800 15px var(--font-manrope), sans-serif;
+  color: var(--da8n-green);
+}
+
+
 .safety__split {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1538,6 +1718,13 @@
   border: 1.5px solid #cbbfae;
   flex: none;
 }
+/* The unresolved-dimension ring in the For You panel: larger and gold, so it
+   reads as "open", not "failed". */
+.ring--gold {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--da8n-gold);
+}
 .sgroup li.link {
   display: block;
   padding: 6px 0 0 28px;
@@ -1596,47 +1783,110 @@
   flex-direction: column;
   gap: 28px;
 }
-.sfeatures {
-  display: flex;
-  flex-direction: column;
-  border-bottom: 1px solid var(--da8n-line-blush);
-}
-.sfeature {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 14px;
-  padding: 16px 0;
-  border-top: 1px solid var(--da8n-line-blush);
-  align-items: start;
-}
 .orb--md {
   width: 36px;
   height: 36px;
   box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.18);
 }
-.sfeature div {
+
+/* The in-chat fraud warning. Same card shell as `.checkin` beside it — both are
+   depictions of one screen, so they share a treatment. */
+.chatwarn {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--da8n-line-blush);
+  border-radius: 26px;
+  padding: clamp(22px, 3vw, 30px);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 30px 60px -36px rgba(163, 22, 74, 0.35);
 }
-.sfeature b {
-  font: 700 17px var(--font-bricolage), sans-serif;
+.chatwarn__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
-.sfeature span {
-  font: 500 14.5px/1.5 var(--font-manrope), sans-serif;
+.chatwarn__label {
+  font: 800 12px var(--font-manrope), sans-serif;
+  letter-spacing: 0.12em;
+  color: var(--da8n-rose-ink);
+}
+.chatwarn__flag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 12.5px var(--font-manrope), sans-serif;
+  color: #b0173d;
+}
+.chatwarn__msg {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.chatwarn__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e9dfd2;
+  display: grid;
+  place-items: center;
+  font: 800 16px var(--font-bricolage), sans-serif;
   color: var(--da8n-muted);
-  text-wrap: pretty;
+  flex: none;
+}
+.chatwarn__bubble {
+  padding: 12px 14px;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--da8n-cream);
+  font: 600 13.5px/1.5 var(--font-manrope), sans-serif;
+  color: var(--da8n-ink-soft);
+}
+.chatwarn__verdict {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff0f2;
+  border: 1px solid #ffc9d3;
+  font: 600 13.5px/1.5 var(--font-manrope), sans-serif;
+  color: #4d4239;
+}
+.chatwarn__verdict b {
+  color: #b0173d;
+}
+.chatwarn__acts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.chatwarn__acts span {
+  text-align: center;
+  padding: 12px;
+  border-radius: 999px;
+  font: 800 14px var(--font-manrope), sans-serif;
+}
+.chatwarn__acts span:first-child {
+  background: var(--da8n-ink);
+  color: #fff;
+}
+.chatwarn__acts span + span {
+  border: 1.5px solid var(--da8n-ink);
+  color: var(--da8n-ink);
 }
 
 .checkin {
+  flex: 1;
   background: #fff;
   border: 1px solid var(--da8n-line-blush);
-  border-radius: 22px;
-  padding: 20px 22px;
+  border-radius: 26px;
+  padding: clamp(22px, 3vw, 30px);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 14px;
-  box-shadow: 0 24px 50px -36px rgba(163, 22, 74, 0.35);
+  box-shadow: 0 30px 60px -36px rgba(163, 22, 74, 0.35);
 }
 .checkin__top {
   display: flex;
@@ -1755,34 +2005,167 @@
 .stories .sec__in {
   --pad-y: clamp(72px, 9vw, 128px);
 }
+/*
+ * The featured story. One photograph, one quote, three dated milestones.
+ *
+ * `min-height` on the media rather than an aspect-ratio: this is a side-by-side
+ * panel whose height is set by the copy next to it, so a ratio would either
+ * crop the text or leave a gap. Below 860px it stacks and the min-height is
+ * what stops the image collapsing to nothing.
+ */
+.feat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background: #fff;
+  border: 1px solid #e8ddcc;
+  border-radius: 32px;
+  overflow: hidden;
+  margin-bottom: clamp(18px, 2.4vw, 28px);
+}
+@media (min-width: 860px) {
+  .feat {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.feat__media {
+  position: relative;
+  min-height: 320px;
+  background: #2f261f;
+}
+@media (min-width: 860px) {
+  .feat__media {
+    min-height: 420px;
+  }
+}
+.feat__body {
+  padding: clamp(28px, 4vw, 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  justify-content: center;
+}
+.feat__body blockquote {
+  margin: 0;
+  font: 700 clamp(24px, 2.6vw, 34px) / 1.22 var(--font-bricolage), sans-serif;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+.feat__who {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.feat__who b {
+  font: 800 17px var(--font-manrope), sans-serif;
+}
+.feat__who > span {
+  font: 700 14.5px var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+}
+
+.feat__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 2px solid var(--da8n-ink);
+}
+.feat__steps li {
+  padding: 14px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.feat__steps span {
+  font: 800 11px var(--font-manrope), sans-serif;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.feat__steps b {
+  font: 700 15px/1.3 var(--font-bricolage), sans-serif;
+}
+
+/*
+ * The two remaining stories, side by side rather than in a scrolling rail. The
+ * card is horizontal — photo left, quote right — which is what lets both fit on
+ * one screen at desktop and still carry a readable quote.
+ */
+.stories__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(18px, 2.4vw, 28px);
+}
+@media (min-width: 1100px) {
+  .stories__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 .story {
   margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background: #fff;
+  border: 1px solid #e8ddcc;
+  border-radius: 28px;
+  overflow: hidden;
+}
+@media (min-width: 560px) {
+  .story {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+@media (min-width: 1100px) {
+  .story {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+.story__media {
+  position: relative;
+  min-height: 240px;
+  background: #2f261f;
+}
+@media (min-width: 560px) {
+  .story__media {
+    min-height: 280px;
+  }
+}
+.story figcaption {
+  padding: clamp(20px, 2.6vw, 28px);
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-.story__media {
-  aspect-ratio: 4 / 5;
-  border-radius: 22px;
-  overflow: hidden;
-  position: relative;
+  justify-content: space-between;
 }
 .story blockquote {
   margin: 0;
-  font: 600 clamp(18px, 1.8vw, 20px) / 1.45 var(--font-bricolage), sans-serif;
+  font: 600 clamp(17px, 1.6vw, 19px) / 1.45 var(--font-bricolage), sans-serif;
   text-wrap: pretty;
 }
-.story figcaption {
+.story__who {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;
 }
-.story figcaption b {
+.story__who b {
   font: 800 15px var(--font-manrope), sans-serif;
 }
-.story figcaption span {
-  font: 600 13.5px var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
+.story__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.story__chips .chip {
+  padding: 5px 11px;
+  background: var(--da8n-cream);
+  border: 1px solid #e8ddcc;
+  color: var(--da8n-ink);
+}
+.story__chips .chip--ink {
+  background: var(--da8n-ink);
+  border-color: var(--da8n-ink);
+  color: #fff;
 }
 
 /* ------------------------------------------------------------- membership */
@@ -2089,3 +2472,110 @@
   padding: 19px 32px;
 }
 
+/* ------------------------------------------------------- guides (FAQ card) */
+
+/*
+ * v4 adds a guides card to the FAQ's sticky column: four real links into
+ * `/guides`, with their titles read from `content/guides.ts` by slug so the
+ * card can never advertise an article that does not exist.
+ */
+.guides {
+  margin-top: 20px;
+  background: #fff;
+  border: 2px solid var(--da8n-ink);
+  border-radius: 22px;
+  box-shadow: 6px 6px 0 var(--da8n-gold);
+  padding: 22px 24px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.guides__kicker {
+  font: 800 12px var(--font-manrope), sans-serif;
+  letter-spacing: 0.14em;
+  color: var(--da8n-gold-ink);
+  margin-bottom: 6px;
+}
+.guides__title {
+  font: 800 clamp(22px, 2.2vw, 26px) / 1.15 var(--font-bricolage), sans-serif;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.guides__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.guides__list li {
+  padding: 14px 0;
+  border-top: 1px solid var(--da8n-line-warm);
+}
+.guides__list a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font: 700 15.5px var(--font-manrope), sans-serif;
+  color: var(--da8n-ink);
+}
+.guides__list a:hover {
+  color: var(--da8n-rose);
+}
+.guides__list a span {
+  color: var(--da8n-rose);
+  flex: none;
+}
+.guides__all {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--da8n-line-warm);
+  font: 800 14px var(--font-manrope), sans-serif;
+  color: var(--da8n-green);
+}
+
+/* -------------------------------------------------------------- app badges */
+
+/*
+ * Android is a real anchor to a real listing; iOS is a span because there is no
+ * listing to point at. They are deliberately NOT the same element, and the
+ * difference is visible as well as semantic: the live one is a solid card with
+ * the design's offset shadow, the other is an outline.
+ */
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+.badge {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 22px;
+  border-radius: 14px;
+}
+.badge span {
+  font: 800 10.5px var(--font-manrope), sans-serif;
+  letter-spacing: 0.14em;
+}
+.badge b {
+  font: 800 18px/1 var(--font-bricolage), sans-serif;
+}
+.badge--live {
+  background: #fff;
+  color: var(--da8n-ink);
+  border: 2px solid var(--da8n-ink);
+  box-shadow: 4px 4px 0 var(--da8n-rose);
+}
+.badge--live:hover {
+  color: var(--da8n-ink);
+}
+.badge--live span {
+  color: var(--da8n-muted);
+}
+.badge--soon {
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  color: #fff;
+  cursor: default;
+}
+.badge--soon span {
+  color: #fff;
+}

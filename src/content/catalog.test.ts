@@ -3,6 +3,8 @@ import { CITIES } from "./cities";
 import { MARKETS, findMarket, publicMarkets } from "./markets";
 import { AUDIENCES } from "./audiences";
 import { COMPETITORS } from "./competitors";
+import { audienceSeoPage } from "./audience-pages";
+import { compareSeoPage } from "./compare-pages";
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const COUNTRY_CODE = /^[a-z]{2}$/;
@@ -132,12 +134,28 @@ describe("audience catalog", () => {
   });
 
   /**
-   * Age-cohort pages are the ones most likely to be thin, because an empty
-   * cohort in a city is both a quality failure and a misleading promise to a
-   * real person. None is indexable until its market's inventory is measured.
+   * REPLACES "has no indexable audience yet", which asserted a phase rather
+   * than a rule. The phase ended when `/audiences/{slug}` was built, and a
+   * test that only describes a moment stops protecting anything the moment it
+   * is edited to pass.
+   *
+   * The durable rule is the one that was underneath it: editorial approval is
+   * never permission to index a page that does not exist or has not been
+   * written. `audienceSeoPage` returns undefined for an audience with no copy,
+   * so this fails the build if someone approves an audience and forgets the
+   * writing — which is exactly the mistake the old test was aimed at.
+   *
+   * What still gates the AUDIENCE x MARKET page is measured liquidity, and
+   * that page is not built. See the note at the top of `content/audiences.ts`.
    */
-  it("has no indexable audience yet", () => {
-    expect(AUDIENCES.filter((audience) => audience.indexable)).toEqual([]);
+  it("never marks an audience indexable without a written page", () => {
+    for (const audience of AUDIENCES) {
+      if (!audience.indexable) continue;
+      expect(
+        audienceSeoPage(audience.slug),
+        `audience ${audience.slug} is indexable but has no written page`,
+      ).toBeDefined();
+    }
   });
 });
 
@@ -168,8 +186,50 @@ describe("competitor catalog", () => {
     }
   });
 
-  it("has no indexable competitor yet", () => {
-    expect(COMPETITORS.filter((competitor) => competitor.indexable)).toEqual([]);
+  /**
+   * REPLACES "has no indexable competitor yet", for the same reason as the
+   * audience case above: it asserted a phase, not a rule.
+   *
+   * The rules that matter are both still here and both still fail closed — a
+   * competitor cannot be indexable without a verification date (the test
+   * directly above) and cannot be indexable without a written page (this one).
+   * Three of the eight records are undated on purpose and are therefore not
+   * indexable; `competitors.ts` records which and why.
+   */
+  it("never marks a competitor indexable without a written page", () => {
+    for (const competitor of COMPETITORS) {
+      if (!competitor.indexable) continue;
+      expect(
+        compareSeoPage(competitor.slug),
+        `competitor ${competitor.slug} is indexable but has no written page`,
+      ).toBeDefined();
+    }
+  });
+
+  /**
+   * The converse, and the one that actually prevented a bad publish here: a
+   * comparison page may state the other product's category ONLY when the
+   * record carries a verification date. Without one, `compareSeoPage` must
+   * omit the category section entirely rather than fall back to the catalog's
+   * unverified guess.
+   */
+  it("omits the category contrast on an unverified comparison page", () => {
+    const CATEGORY_HEADINGS = [
+      "What a swipe-first app is good at, and what it costs",
+      "Closer in philosophy, and the gap that remains",
+      "An algorithm you can see the workings of",
+      "Strong in one place, thin everywhere else",
+    ];
+    for (const competitor of COMPETITORS) {
+      const page = compareSeoPage(competitor.slug);
+      if (!page) continue;
+      const headings = page.sections.map((section) => section.heading);
+      const statesCategory = headings.some((heading) => CATEGORY_HEADINGS.includes(heading));
+      expect(
+        statesCategory,
+        `${competitor.slug}: category claim must appear only with a verification date`,
+      ).toBe(Boolean(competitor.factsVerifiedAt));
+    }
   });
 });
 

@@ -1,21 +1,33 @@
 import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import {
   ALL_CITIES_FACES,
+  CHAT_WARNING,
   CHECK_IN,
+  CITIES_SECTION,
+  COMPAT,
   FAQS,
+  FAQ_SECTION,
+  FEATURED_STORY,
   FOOTER_COLUMNS,
+  GUIDES_CARD,
   LANDING_CITIES,
   MEMBERSHIP,
+  HOW,
   PILLARS,
   PRIMARY_NAV,
   SAFETY,
-  SAFETY_FEATURES,
+  SAFETY_CARDS,
   SAFETY_PROFILE,
   STEPS,
   STORIES,
+  STORIES_SECTION,
   TIERS,
+  WHY,
 } from "./landing";
 import { findCity } from "./cities";
+import { findGuide } from "./guides";
 import { findMarket, publicMarkets } from "./markets";
 import { FORBIDDEN_CONTENT_PATTERNS } from "@/lib/indexability";
 
@@ -55,7 +67,15 @@ function allCopy(): string[] {
     ...PILLARS.flatMap((pillar) => [pillar.kicker, pillar.title, pillar.body]),
     ...STEPS.flatMap((step) => [step.label, step.detail]),
     ...LANDING_CITIES.flatMap((city) => [city.label, city.countryLabel]),
-    ...STORIES.flatMap((story) => [story.quote, story.who, story.meta]),
+    ...STORIES.flatMap((story) => [story.quote, story.who, ...story.chips]),
+    FEATURED_STORY.quote,
+    FEATURED_STORY.who,
+    FEATURED_STORY.route,
+    ...FEATURED_STORY.milestones.flatMap((milestone) => [milestone.label, milestone.value]),
+    ...COMPAT.reasons,
+    COMPAT.partial.text,
+    COMPAT.partial.verdict,
+    ...GUIDES_CARD.slugs,
     ...TIERS.flatMap((tier) => [tier.name, tier.badge, tier.blurb, tier.cta, ...tier.features]),
     ...FAQS.flatMap((faq) => [faq.question, faq.answer]),
     ...FOOTER_COLUMNS.flatMap((column) => column.links.map((link) => link.label)),
@@ -171,8 +191,6 @@ function safetyCopy(): string[] {
     SAFETY.title,
     SAFETY.titleAccent,
     SAFETY.titleTail,
-    SAFETY.claim,
-    SAFETY.body,
     SAFETY.disclosure,
     SAFETY_PROFILE.trust.label,
     SAFETY_PROFILE.trust.band,
@@ -184,7 +202,12 @@ function safetyCopy(): string[] {
       ...group.items.map((item) => item.text),
     ]),
     ...SAFETY_PROFILE.trust.items.map((item) => item.text),
-    ...SAFETY_FEATURES.flatMap((feature) => [feature.title, feature.body]),
+    ...SAFETY_CARDS.flatMap((card) => [card.kicker, card.title, card.body, card.cta]),
+    CHAT_WARNING.label,
+    CHAT_WARNING.flag,
+    CHAT_WARNING.message,
+    CHAT_WARNING.verdictLead,
+    CHAT_WARNING.verdictRest,
     CHECK_IN.label,
     CHECK_IN.live,
     CHECK_IN.plan,
@@ -228,56 +251,84 @@ describe("safety copy", () => {
     expect(SAFETY.disclosure).toMatch(/private documents/i);
   });
 
-  it("describes background checks as consent-based", () => {
-    const feature = SAFETY_FEATURES.find((entry) => /background check/i.test(entry.title));
-    expect(feature).toBeDefined();
-    expect(feature?.body).toMatch(/consent-based/i);
+  /*
+   * v4 stopped advertising background checks as a safety feature. v3 listed them
+   * as one of six, which is why the old version of this test required the words
+   * "consent-based" in that copy — a promised capability needs its qualifier.
+   *
+   * The qualifier is not needed any more because the promise is gone: the only
+   * place background checks now appear is a "Not completed" row on the example
+   * Safety Profile, which states a fact about a record rather than offering
+   * anything. This test holds that line. If background checks are ever sold as a
+   * feature again, the consent qualifier has to come back with them.
+   */
+  it("offers no background-check capability, only an uncompleted status", () => {
+    expect(SAFETY_PROFILE.backgroundCheck.status).toBe("Not completed");
+    for (const card of SAFETY_CARDS) {
+      expect(/background check/i.test(`${card.title} ${card.body}`)).toBe(false);
+    }
+  });
+
+  /*
+   * Every safety card's explainer is a label, not a link, because none of the
+   * pages behind them (`/realme`, `/safety`, the Safety Centre) is built. This
+   * fails the day someone sets an href without building the page — which is the
+   * exact mistake the footer rule in `content/landing.ts` was written after.
+   */
+  it("links a safety explainer only when it has a destination", () => {
+    for (const card of SAFETY_CARDS) {
+      if (card.href === null) continue;
+      expect(card.href).not.toBe("#");
+      expect(card.href.startsWith("/") || card.href.startsWith("#")).toBe(true);
+    }
   });
 });
 
 describe("stories", () => {
-  it("marks every unconsented story so it cannot read as a testimonial", () => {
-    // While `consented` is false the component stamps the card DRAFT. This
-    // test exists so that flipping the flag to clear the stamp — rather than
-    // because a real couple agreed — fails here.
-    const placeholders = [
-      "I had left every app",
-      "Two continents, one matchmaker",
-      "My mother's first question",
-    ];
-    for (const story of STORIES) {
-      if (!story.consented) continue;
-      for (const placeholder of placeholders) {
-        expect(
-          story.quote.includes(placeholder),
-          `"${story.who}" is marked consented but still carries placeholder copy`,
-        ).toBe(false);
-      }
+  it("has a quote and an attribution for every card", () => {
+    for (const story of [...STORIES, FEATURED_STORY]) {
+      expect(story.quote.length).toBeGreaterThan(20);
+      expect(story.who.length).toBeGreaterThan(0);
     }
   });
 
-  it("has a quote and an attribution for every card", () => {
-    for (const story of STORIES) {
-      expect(story.quote.length).toBeGreaterThan(20);
-      expect(story.who.length).toBeGreaterThan(0);
+  it("gives the featured story its three milestones", () => {
+    expect(FEATURED_STORY.milestones).toHaveLength(3);
+  });
+
+  /*
+   * These are testimonials about named people on a page with no DRAFT stamp,
+   * which is the owner's decision and the right one for live marketing. What
+   * must not creep back in is a CLAIM about outcomes at scale — "thousands of
+   * couples", "most members marry within a year". One couple saying what
+   * happened to them is a story; a number is a statistic, and a statistic
+   * needs a dated source and its own decision.
+   */
+  it("states no outcome statistic in any story", () => {
+    for (const story of [...STORIES, FEATURED_STORY]) {
+      const text = [story.quote, story.who].join(" ");
+      expect(/\b\d[\d,.]*\s*(couples|marriages|members|users|weddings)\b/i.test(text)).toBe(false);
+      expect(/\b(most|majority of|\d+%)\s+(members|couples|users)\b/i.test(text)).toBe(false);
     }
   });
 });
 
 describe("membership", () => {
-  it("keeps the DRAFT stamp while there is no payments implementation", () => {
-    expect(MEMBERSHIP.draft).toBe(true);
-  });
-
-  it("marks only the free tier as purchasable", () => {
-    // `purchasable` is what decides whether a tier renders a live anchor.
-    // Nothing paid may link anywhere until payments exist.
-    const purchasable = TIERS.filter((tier) => tier.purchasable).map((tier) => tier.id);
-    expect(purchasable).toEqual(["free"]);
+  it("gives every tier a real destination", () => {
+    // No bare "#", and nothing may be a dead end: every tier CTA is a live
+    // link now that the "Soon" labels are gone, so a typo here ships a 404 on
+    // the page's most commercial control.
+    for (const tier of TIERS) {
+      expect(tier.href).not.toBe("#");
+      expect(tier.href.startsWith("/")).toBe(true);
+      expect(["app", "site"]).toContain(tier.target);
+    }
   });
 
   it("quotes no price on any tier", () => {
-    // There is no priced plan. A number here would be an offer.
+    // Pricing is per-market and lives in the member application, which is the
+    // only host that knows the visitor's market and currency. A number here
+    // would be an offer this host cannot honour.
     for (const tier of TIERS) {
       const text = [tier.name, tier.badge, tier.blurb, tier.cta, ...tier.features].join(" ");
       expect(/[$£€₦R]\s?\d/.test(text)).toBe(false);
@@ -308,6 +359,65 @@ describe("FAQ structured data source", () => {
   });
 });
 
+describe("destinations", () => {
+  /*
+   * Every "Soon" label on this page was replaced with a live link on
+   * 2026-10-05. These tests are what that decision is worth: each of those
+   * destinations has to be a page that exists, checked at build time, or the
+   * removal of the hedging just converts honest labels into 404s on the site's
+   * highest-authority page.
+   */
+  it("points every safety card at a real page", () => {
+    const built = new Set(["/realme", "/safety"]);
+    for (const card of SAFETY_CARDS) {
+      expect(card.href.startsWith("/")).toBe(true);
+      if (card.href.startsWith("/guides/")) {
+        const slug = card.href.slice("/guides/".length);
+        expect(findGuide(slug), `${card.href} is not a guide`).toBeDefined();
+        continue;
+      }
+      expect(built, `${card.href} has no page`).toContain(card.href);
+    }
+  });
+
+  it("resolves every guide the FAQ card advertises", () => {
+    for (const slug of GUIDES_CARD.slugs) {
+      expect(findGuide(slug), `${slug} is not in guides.ts`).toBeDefined();
+    }
+  });
+
+  it("points the background-check row at the section that explains it", () => {
+    expect(SAFETY_PROFILE.backgroundCheck.href).toBe("/safety#background-checks");
+  });
+});
+
+describe("section numbering", () => {
+  /*
+   * v4 numbers the eight sections and the numbers are visible, so a missing or
+   * duplicated one is a visible defect. They are declared per section rather
+   * than derived from render order, which is the only thing that makes them
+   * assertable here — and the only thing that would catch two sections both
+   * labelled "05" after a reorder.
+   */
+  it("numbers the sections 01-08 exactly once each, in page order", () => {
+    const nums = [
+      WHY.num,
+      HOW.num,
+      COMPAT.num,
+      CITIES_SECTION.num,
+      SAFETY.num,
+      STORIES_SECTION.num,
+      MEMBERSHIP.num,
+      FAQ_SECTION.num,
+    ];
+    expect(nums).toEqual(["01", "02", "03", "04", "05", "06", "07", "08"]);
+  });
+
+  it("numbers the four how-it-works steps 01-04", () => {
+    expect(STEPS.map((step) => step.num)).toEqual(["01", "02", "03", "04"]);
+  });
+});
+
 describe("navigation", () => {
   it("points every nav and footer link at a fragment or an internal path", () => {
     // No bare "#" placeholders: on a sitewide footer they are a crawl trap and
@@ -319,11 +429,47 @@ describe("navigation", () => {
     }
   });
 
+  /*
+   * Every routed link in the header and footer must be a page that exists.
+   * Before 2026-10-05 the footer pointed almost entirely at fragments on the
+   * landing page, so this could not go wrong; now it points at eleven built
+   * routes, and a typo would ship a 404 in the footer of all 60+ pages.
+   *
+   * CHECKED AGAINST THE FILESYSTEM, not against a list.
+   *
+   * This test used to hold a hand-written set of the routes that existed. That
+   * is the same mistake one level up: a second list to keep in step, which
+   * fails in the direction that hurts — a page is added, the footer links it,
+   * the list is not updated, and the test rejects a link that is perfectly
+   * fine. (It did exactly that when `/contact` was built.) Asking the
+   * filesystem whether `src/app/<segment>/page.tsx` exists cannot drift,
+   * because it is not a claim about the app; it is the app.
+   */
+  it("points every routed nav and footer link at a built page", () => {
+    const appDir = path.resolve(import.meta.dirname, "../app");
+
+    const paths = [...PRIMARY_NAV, ...FOOTER_COLUMNS.flatMap((column) => column.links)]
+      .map((link) => link.href)
+      // `navHref` resolves a bare fragment against `/`; those are the landing
+      // page's own sections and have no route of their own.
+      .filter((href) => href.startsWith("/"))
+      // A deep link keeps its route and drops its anchor.
+      .map((href) => href.split("#")[0] ?? "/");
+
+    for (const routePath of paths) {
+      const segments = routePath.split("/").filter(Boolean);
+      const file = path.join(appDir, ...segments, "page.tsx");
+      expect(existsSync(file), `${routePath} has no page at ${file}`).toBe(true);
+    }
+  });
+
   it("targets a section that exists for every in-page nav link", () => {
     // The ids rendered by the landing page's sections.
     const sectionIds = [
       "why",
       "how",
+      // `#ready` is an anchor inside the how-it-works section (step 04), not a
+      // section of its own — v4 dissolved the panel it used to sit on.
       "cities",
       "compatibility",
       "ready",

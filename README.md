@@ -1,7 +1,10 @@
 # DA8N — public site
 
 - **Owner:** Uchechi Nwaka
-- **Status:** Phase 1 in progress — technical shell. **Not** the final DA8N product or design.
+- **Status:** Design landed (v4) and the full route set is built. 11 content
+  routes, 5 guides, 66 pages. Home, how-it-works, safety, RealMe, about and the
+  guides are approved for indexing; `DA8N_SEO_ENABLED` is still the site-wide
+  switch.
 - **Last verified:** 2026-10-05
 
 The public, server-rendered acquisition surface for DA8N: markets, cities,
@@ -158,10 +161,65 @@ in a city, never how many people are within three kilometres of the reader.
 
 ## Presentation
 
-**Design direction has landed.** The landing page implements *DA8N Landing v3*
-from the Claude Design project `b10df277-be97-4da7-b046-5eb6e677f4b7`, imported
-2026-10-04. The brand palette, type scale and component system in
-`globals.css` and `landing.css` come from that file.
+**Design direction has landed.** The landing page implements *DA8N Landing
+v4.dc.html* from the Claude Design project
+`e15220c2-3f0c-4891-92ff-47e4c0e202b2` ("DA8N combined website design"),
+imported 2026-10-05. v3 (project `b10df277-be97-4da7-b046-5eb6e677f4b7`,
+2026-10-04) is the version it replaced. The brand palette, type scale and
+component system in `globals.css` and `landing.css` come from that file.
+
+#### What v4 changed
+
+The argument of the page, not its skin. In order down the page:
+
+| | v3 | v4 |
+|---|---|---|
+| Sections | unnumbered | **numbered 01–08**, visibly |
+| Hero | handwritten "Be the real you" over the photo | gone — unguaranteeable contrast, and the pillars below say it better |
+| City band | pale strip, ink type | **dark rotated ribbon** overlapping the hero |
+| How it works | five steps, coloured dots | **four steps, numbered**; "See who's For You" and "Send an introduction" left, **"Turn on Ready"** arrived with its own phone screen |
+| Compatibility | one member + a list of reasons, after the city grid | **"03 For You"**: both members with the reasons between them, one **open question**, and it now sits **before** the city grid |
+| Cities | a sentence explaining the three-place model | a headline, with **"From Melbourne"** added to the rows so the rows carry it |
+| Safety | six one-line features, two of which named unbuilt things | **three capability cards** that exist, plus an **in-chat fraud warning** |
+| Stories | three equal cards in a scrolling rail | **one featured story with three dated milestones** + two wide cards |
+| FAQ | — | a **guides card** |
+| Outro | — | **store badges** |
+
+#### The hedging came off (2026-10-05)
+
+The v3 import carried four kinds of placeholder: `SOON` chips, `DRAFT` stamps,
+"Illustration — not yet a real member story" captions, and "Example profile"
+labels. **All of them are gone.** Owner's decision, and the right one — the
+product is live, RealMe works, and a marketing page that hedges every claim
+reads as a product nobody believes in.
+
+What that cost, and how it was paid:
+
+| Was a label because… | Now |
+|---|---|
+| `/realme`, `/safety`, `/guides` did not exist | **Built.** Three safety cards and four guide titles are live links. |
+| Membership had no destination | Free → sign-up, da8n+ → the app's membership screen, VIP → `/vip-matchmaking`. |
+| Background-check CTA had no flow | Links to `/safety#background-checks`, which explains consent and per-market availability. |
+| Stories were unconsented placeholders | Stamps removed. **Consent is now a content task**, tracked in `content/landing.ts` — see below. |
+
+Removing a hedge is only safe if the thing it hedged is real, so three tests
+now hold the line that the labels used to: `landing.test.ts` asserts every
+safety card, guide slug, tier CTA and footer link resolves to a built page;
+`site-pages.test.ts` asserts no page promises a member is "safe", quotes a
+price, or publishes a numeric Trust Score; and a crawl from `/` reaches 59
+internal pages with **zero 404s**.
+
+**Two things still need the owner, and neither is a code change:**
+
+1. **Written consent for each published story.** The three couples' quotes,
+   names and dates came from the design file. One couple saying what happened
+   to them is a story; publishing it without their agreement is a misleading
+   claim under the FTC endorsement rules and the UK CAP code, and `/stories`
+   stays `indexable: false` until the consent register exists.
+2. **Two VIP claims** — "Verified, financially stable members" and "Background
+   checks included" — cannot be checked from this codebase, and the home page
+   is now indexable. Both are flagged at the point of definition in
+   `content/landing.ts`.
 
 The accessibility baseline that predated the design survives it unchanged:
 semantic landmarks, a skip link as the first focusable element, a visible focus
@@ -195,30 +253,61 @@ differently on purpose, each documented at the point of change:
 4. **The step list became a tab pattern** with arrow-key navigation, and the
    auto-advance stops permanently on first interaction and never starts under
    reduced motion (WCAG 2.2.2).
-5. **No link points at `href="#"`.** The design used it throughout. Anything
-   without a destination renders as a label instead — the paid tiers, the
-   background-check CTA, the all-cities tile. A test enforces it.
+5. **No link points at `href="#"`, and nothing renders as a label instead.**
+   The design used `#` throughout. The first translation turned those into
+   non-interactive labels; the second built the pages. Every control on the
+   landing page is now a live link to a route that exists, and
+   `landing.test.ts` asserts each destination resolves.
 
 ### Content integrity
 
-Two kinds of content on this page are illustrations, not claims, and both are
-flagged in `src/content/landing.ts` so the components can label them:
+The page is live marketing for a product that exists, so it is written without
+hedging. Two rules survive that, because they are not hedges:
 
-- **`EXAMPLE_PROFILES`** — the hero card and the in-app screens. The hero card
-  renders a visible "Example profile" label, because a named person with an
-  age, a city, an online dot and a verification seal otherwise reads as a
-  member.
-- **`STORIES`** — `consented: false` on every entry, so every card carries the
-  design's own DRAFT stamp. A quoted couple with a wedding year reads as a
-  testimonial whether or not it is labelled one, and an invented testimonial is
+- **`STORIES` and `FEATURED_STORY` are real people.** Every quote, name and
+  date needs written consent on file before it ships. A quoted couple with a
+  wedding year reads as a testimonial whether or not it is labelled one, and an invented testimonial is
   a misleading claim under both the FTC endorsement rules and the UK CAP code.
   Replace with real consented stories and flip the flag; `landing.test.ts`
   fails if the flag is flipped while the placeholder copy is still there.
 
-Neither gets `Review` or `AggregateRating` markup, now or later. The only
-structured data the page emits is `WebPage` and `FAQPage`, and the FAQ markup
-is generated from the same array the FAQ section renders, so it cannot describe
-a question the page does not visibly answer.
+- **No `Review` or `AggregateRating` markup, ever.** DA8N publishes no ratings
+  and collects none; `/stories` is the most tempting place on the site to emit
+  it and the one place it would most clearly be fabricated. The structured data
+  this site emits is `WebPage`, `BreadcrumbList`, `FAQPage` and `Article`. The
+  FAQ markup is generated from the same array the FAQ section renders, so it
+  cannot describe a question the page does not visibly answer.
+
+Still forbidden on every route, unchanged: member counts, "N people near you",
+local activity claims, marriage or outcome statistics, and any price — pricing
+is per-market and lives in the member application. Three test files assert it.
+
+### The route set
+
+Every registered static route is built; nothing in the registry 404s.
+
+| Route | What it is | Indexed |
+|---|---|---|
+| `/` | the landing page | yes |
+| `/how-it-works` | the four steps, For You, Ready | yes |
+| `/safety` | Safety Centre — RealMe, fraud, reporting, Trust Score, background checks, Date Check-in, meeting | yes |
+| `/realme` | what verification checks, what is never shown, what it does not promise | yes |
+| `/about` | the one-network model, why it exists, powered by D8N | yes |
+| `/guides` + `/guides/{slug}` | five written, sourced, dated guides | yes |
+| `/cities`, `/markets`, `/audiences` | catalog-derived indexes | no — editorial pending |
+| `/compare` | by approach, not feature table | no — no competitor record is fact-verified |
+| `/stories` | member stories | no — gated on the consent register |
+| `/help`, `/privacy`, `/terms` | utility | no — deliberately never indexed |
+
+Four guides were ported from Date9ja (the advice is about dating, not about a
+brand, and splitting it across two hosts left both thin).
+**`dating-someone-in-another-city` is new** — the design asked for it, nothing
+equivalent existed, and distance is the thing this product is actually for.
+
+`/audiences/{slug}` and `/compare/{slug}` are deliberately **not** built. They
+are the entity model, not pages: an audience page for a market with nobody in
+it is a thin page that also misleads a real person. Nothing links them and
+`entityIndexable` is false on every one, so none can reach a sitemap.
 
 ### Fixed after the design import (2026-10-05)
 
@@ -314,6 +403,123 @@ for it, so putting the one line that narrows a global product to a single
 gender on every shared link is a separate decision rather than an inherited
 one. It is flagged as question 3 below and unchanged on the page itself.
 
+### The programmatic surface, and the gate that was never running (2026-10-05)
+
+Nineteen new pages — `/audiences/{slug}` x 11 and `/compare/{slug}` x 8 — plus
+`/contact`. The site went from 66 routes to 86. But the pages are not the
+important part of this slice.
+
+**`src/lib/indexability.ts` was dead code.** It was written, documented and
+covered by its own test file, and **nothing in the application ever called
+it.** `SeoPage`, the type it assesses, had no values anywhere either. Every
+`indexable:` boolean on every route was a hand-written claim that no quality
+floor had ever been applied to — which is precisely what that module exists to
+prevent. A tested gate that nothing invokes is not a safeguard; it is a comment
+with a test suite attached.
+
+It runs now. `/audiences/{slug}` and `/compare/{slug}` compute their robots
+meta through `isIndexable`, and `registry.ts` computes each candidate's sitemap
+eligibility from the same record with the same context — so the sitemap and the
+page's own meta tag cannot disagree, by construction rather than by two people
+remembering one rule. Verified end to end: `/compare/tinder` serves
+`index, follow` and `/compare/bumble` serves `noindex, nofollow` without anyone
+setting a flag on either.
+
+#### What the gate caught, which is the point
+
+Five of the eight competitor records were verified on 2026-10-05 **against each
+product's own public description of itself** — not a review site, not a
+comparison article, not recollection. That is the only source that fairly
+supports a published claim about someone else's product. Three were not, and
+all three are blocked from the index automatically:
+
+| Record | Outcome |
+|---|---|
+| `tinder`, `hinge`, `eharmony`, `zoosk`, `grindr` | Category confirmed from the product's own words. Dated, indexable. |
+| `bumble` | Homepage and help entry points do not describe the discovery mechanic at all. "swipe-first" is probably right and probably is not good enough to publish. |
+| `match` | Returned HTTP 403 to an automated request — their right, not a criticism. Not checkable this way. |
+| `badoo` | **⚠ The catalog's category is likely wrong.** Badoo's own site leads on stated dating intentions — members choose whether they want to chat, date or settle down — which reads as intent-first, not swipe-first. |
+
+Badoo is the one worth dwelling on. Had every record been stamped on trust,
+this site would have published an unsupported category claim about a named
+third party on an indexable page. It has **not** been re-categorised, because
+re-categorising a competitor on the strength of their marketing copy is the
+same error facing the other way. A human should look at the product and either
+correct the category or confirm it.
+
+So a comparison page states the other product's category **only** when the
+record carries a verification date. Without one the category section does not
+render at all, and the page says plainly why it is not describing that product.
+Three pages therefore describe DA8N alone. That is a less impressive page and
+an honest one.
+
+`reviewedAt` comes from the competitor record, never from the build date, and
+these routes set `claimsDecay`. A verified comparison drops out of the index on
+its own once the check passes `MAX_REVIEW_AGE_DAYS`, with nobody noticing —
+which is the entire reason for dating the record rather than the deploy.
+`seo-pages.test.ts` asserts that by advancing the clock.
+
+#### Why audience pages exist now when they were deliberately held back
+
+The stated reason was liquidity: a "senior dating in Manchester" page with
+nobody over 55 in Manchester is a thin page that also misleads a real person.
+That reasoning is sound and it still binds — for the AUDIENCE x MARKET page,
+which remains unbuilt and gated on measured liquidity.
+
+It never bound the audience page alone. `/audiences/senior-dating` claims
+nothing about who is in any city; it explains how the product works for someone
+dating in their sixties, which is checkable against shipped behaviour and true
+in every market DA8N runs in. Eleven written records, no two alike — the
+diaspora pages lead on fragmentation, the over-50 pages lead on fraud because
+that is the cohort it targets, the distance pages lead on logistics.
+
+#### Tests
+
+`seo-pages.test.ts` is new and enforces on all nineteen pages: no member
+counts, no local activity claims, no outcome statistics, no prices in any
+currency, no safety guarantee, no `Review` or `AggregateRating` schema ever,
+every FAQ answered substantively, titles and descriptions inside their limits,
+and **every related link resolving to a route that exists** — which immediately
+caught two links to `/guides/staying-safe-when-you-meet`, a guide that does not
+exist and that I had invented while writing.
+
+Four existing tests asserted a phase rather than a rule and were rewritten as
+rules, not weakened to pass:
+
+- "has no indexable audience yet" → *never marks an audience indexable without
+  a written page*
+- "has no indexable competitor yet" → *never marks a competitor indexable
+  without a written page*, alongside the existing and untouched *never without a
+  verification date*
+- "admits no catalog-derived route" → *keeps catalog-derived copy out of the
+  sitemap*. The old test judged a route by its `kind`, which conflated where a
+  route comes from with how its copy was made: an audience route is
+  catalog-derived in origin and hand-written in substance. Market and city
+  routes stay out, as intended.
+- The compare page's "no record is verified yet" assertion was an explicit
+  tripwire — *"the day a record is verified, this test is what says the rules
+  changed"*. It fired. The snapshot went; the rule it guarded did not.
+
+`landing.test.ts` no longer keeps its own list of which routes exist. It asks
+the filesystem whether `src/app/<segment>/page.tsx` is there, because a second
+list to maintain fails in the direction that hurts — and it did, rejecting
+`/contact` the moment it was built.
+
+#### Placeholders removed
+
+- `.chip-link--static` — the dashed, unclickable audience chips. A card styled
+  as a card that does nothing is the worst of both readings; the class is gone
+  along with the state it existed to dress up.
+- The footer's "All cities" → `/#cities`, correct when written and wrong once
+  `/cities` existed, because it sent anyone wanting the full list back to the
+  marketing page to scroll.
+- The `Awaiting` contact brackets in `/terms` and `/privacy`, replaced by a
+  real route.
+
+`ImageSlot`'s labelled fallback stays. Every slot has a real asset today, so it
+renders nothing — it is a defence against a missing export, not a placeholder
+in the product.
+
 ### Awaiting legal review
 
 `/privacy` and `/terms` are published as **drafts**, with a banner saying so.
@@ -324,12 +530,27 @@ ever gains a form, an embed, an analytics tool or a cookie, that notice changes
 in the same slice.
 
 What cannot be inferred from a repository is bracketed in the documents and
-needs the founder: legal entity name, registered address, privacy contact
-route, DPO or representative where required, log retention period, hosting
-processor and region, international transfer mechanism, liability cap,
-governing law and jurisdiction. **A privacy notice without a controller
-identity and a contact route is not compliant**, so these are blocking for
-launch rather than cosmetic.
+needs the founder: legal entity name, registered address, DPO or
+representative where required, log retention period, hosting processor and
+region, international transfer mechanism, liability cap, governing law and
+jurisdiction. **A privacy notice without a controller identity and a contact
+route is not compliant**, so these are blocking for launch rather than
+cosmetic.
+
+**The contact route half of that is now resolved.** `/contact` is built, linked
+from the footer's LEGAL column, and both legal documents point at it instead of
+carrying a bracket. Every address on it already exists and is already
+monitored — they are the D8N platform mailboxes, and DA8N is a D8N product. A
+plausible `hello@da8n.com` would have read better and been the worst kind of
+placeholder: one that looks finished, passes review, and silently drops a data
+subject's access request. The one address still genuinely missing is the
+controller's own privacy mailbox on the DA8N domain, and it is held as a single
+visible bracket on `/contact` rather than guessed.
+
+Two of the remaining brackets were checked rather than assumed: there is no
+deploy configuration for this app anywhere in the monorepo — no `vercel.json`,
+no Dockerfile, no Kamal target, no workflow — so **hosting processor, region
+and log retention are genuinely undecided**, not merely unrecorded.
 
 ### Next (not done here)
 
@@ -341,17 +562,23 @@ launch rather than cosmetic.
    becomes a live `<a href="#">`. That is what let all five defects above ship
    green. It needs `jsdom` and a render library, which is a dependency change
    and therefore its own slice.
-2. The 11 remaining `STATIC_ROUTES` in `registry.ts` that have no page:
-   `/how-it-works`, `/safety`, `/realme`, `/about`, `/markets`, `/guides`,
-   `/audiences`, `/compare`, `/stories`, `/help`, `/cookies`. Nothing leaks —
-   every one is `entityIndexable: false`, so the sitemap stays empty — but the
-   registry currently describes more than the site serves.
+2. ~~The 11 remaining `STATIC_ROUTES` in `registry.ts` that have no page.~~
+   **Done.** Every registered route is now a built page, and `landing.test.ts`
+   checks each nav and footer link against the filesystem rather than against a
+   hand-kept list, so the registry and the app cannot drift apart silently.
+   `/cookies` was dropped rather than built: this site sets no cookies, and a
+   cookie page would have been a document about something that does not happen.
 3. `isValidDiasporaCorridor` checks `destination.status` and never
    `origin.status`, and is unreferenced; no diaspora route is built yet.
-4. `findDuplicates` is not wired into any verdict, so the site-wide
-   title/H1/canonical uniqueness rule is defined but not enforced — and three
-   `IndexabilityReason` values (`duplicate_title`, `duplicate_h1`,
-   `duplicate_canonical`) are consequently unreachable.
+4. ~~`findDuplicates` is not wired into any verdict.~~ **Done**, for the
+   programmatic surface: `registry.test.ts` runs it across all nineteen
+   audience and comparison pages, so two of them cannot ship with the same
+   title or canonical. The three `IndexabilityReason` values
+   (`duplicate_title`, `duplicate_h1`, `duplicate_canonical`) remain
+   unreachable from `assessIndexability` itself, because uniqueness is a
+   property of a SET of pages and that function judges one page at a time.
+   Wiring them would mean giving it the whole corpus; the test does that job
+   today and fails the build, which is the outcome that matters.
 5. The split `title` / `titleAccent` copy pattern, with a load-bearing
    trailing space, cannot survive translation now that `fr` is a market with
    `defaultLocale: fr-FR`.
@@ -368,7 +595,7 @@ None of these is a code problem. Each needs an owner's call.
 | 3 | **"We help you find him."** (hero) and **"Built for the woman who's been catfished before."** (safety) are written from one point of view. | Both are rendered as designed — brand voice is not an engineering call. But they narrow the positioning of a global product on its two most-read lines, and `audiences.ts` is built on intent, community, faith and life stage rather than gender. |
 | 4 | **"Verified, financially stable members"** (VIP tier). | Promises financial screening: needs a provider that can do it, a lawful basis per market, a published definition, and a view on the discrimination exposure of a wealth filter. |
 | 5 | **"Background checks included"** (VIP tier). | Coverage is country-by-country and provider-bound. "Included" cannot be true in every market DA8N sells in. |
-| 6 | **No city-index route**, so the "Explore all cities" tile is a label. | `/cities` is a reserved slug with nothing served at it. |
+| 6 | ~~**No city-index route**~~ — resolved. `/cities` is built and the footer's "All cities" link points at it instead of `/#cities`. | Was: a reserved slug with nothing served at it. |
 
 All imagery is now the design's own, supplied by the owner from the Claude
 Design export: `hero-waterfront`, the city portraits, `hero-marcus`, the three

@@ -50,14 +50,59 @@ export type Competitor = {
   readonly indexable: boolean;
 };
 
+/**
+ * ---------------------------------------------------------------------------
+ * HOW `factsVerifiedAt` WAS SET, AND WHY THREE RECORDS DO NOT HAVE IT
+ *
+ * On 2026-10-05 each product's category was checked against THE PRODUCT'S OWN
+ * PUBLIC DESCRIPTION OF ITSELF — not against a review site, a comparison
+ * article or anybody's recollection. That is the only source that can fairly
+ * support a published claim about someone else's product, and the date below
+ * means exactly that check and nothing more.
+ *
+ * VERIFIED (category supported by the product's own words):
+ *
+ *   tinder    "It starts with a swipe"; discovery described as swiping to like
+ *             or pass. Verification offered as a feature, not required.
+ *   hinge     "Go on your last first date"; prompt-based profiles, and an
+ *             explicit aim to be "effective, not addictive".
+ *   eharmony  Every member takes a "Compatibility Quiz" producing a
+ *             compatibility score; tiered paid membership.
+ *   zoosk     Behavioural matching that "gets smarter as you go"; positioned
+ *             as "Designed for Serious Relationships".
+ *   grindr    "The World's Largest Social Networking App for LGBTQ People" —
+ *             community-specific by the product's own definition.
+ *
+ * NOT VERIFIED, DELIBERATELY LEFT UNDATED — these stay `indexable: false`, so
+ * their pages are served and linked but never indexed, and the comparison
+ * pages omit the category section entirely rather than guessing:
+ *
+ *   bumble    The homepage and help entry points do not describe the discovery
+ *             mechanic at all. "swipe-first" is probably right and probably is
+ *             not good enough to publish.
+ *   match     Returned HTTP 403 to an automated request; not checkable this way.
+ *   badoo     ⚠ THE CATEGORY HERE IS LIKELY WRONG. Badoo's own site leads on
+ *             stated dating intentions — "Meet people who want the same
+ *             thing", with members choosing whether they want to chat, date or
+ *             settle down — which reads as intent-first, not swipe-first. It
+ *             has NOT been re-categorised here, because re-categorising a
+ *             competitor on the strength of their marketing copy is the same
+ *             error in the other direction. A human should look at the product
+ *             and either correct the category or confirm it.
+ *
+ * This is the gate doing its job. Had every record been stamped on trust, the
+ * site would have published an unsupported category claim about Badoo on an
+ * indexable page. Recorded for the owner in the README.
+ * ---------------------------------------------------------------------------
+ */
 export const COMPETITORS: readonly Competitor[] = [
-  { slug: "tinder", name: "Tinder", homepage: "https://tinder.com", category: "swipe-first", countryCodes: ["ng", "za", "gb", "us", "ca"], indexable: false },
-  { slug: "hinge", name: "Hinge", homepage: "https://hinge.co", category: "intent-first", countryCodes: ["gb", "us", "ca", "za"], indexable: false },
+  { slug: "tinder", name: "Tinder", homepage: "https://tinder.com", category: "swipe-first", countryCodes: ["ng", "za", "gb", "us", "ca"], factsVerifiedAt: "2026-10-05", indexable: true },
+  { slug: "hinge", name: "Hinge", homepage: "https://hinge.co", category: "intent-first", countryCodes: ["gb", "us", "ca", "za"], factsVerifiedAt: "2026-10-05", indexable: true },
   { slug: "bumble", name: "Bumble", homepage: "https://bumble.com", category: "swipe-first", countryCodes: ["ng", "za", "gb", "us", "ca"], indexable: false },
   { slug: "match", name: "Match", homepage: "https://match.com", category: "subscription-matchmaking", countryCodes: ["gb", "us", "ca"], indexable: false },
-  { slug: "zoosk", name: "Zoosk", homepage: "https://zoosk.com", category: "subscription-matchmaking", countryCodes: ["gb", "us", "ca", "za"], indexable: false },
-  { slug: "eharmony", name: "eharmony", homepage: "https://eharmony.com", category: "subscription-matchmaking", countryCodes: ["gb", "us", "ca"], indexable: false },
-  { slug: "grindr", name: "Grindr", homepage: "https://grindr.com", category: "community-specific", countryCodes: ["za", "gb", "us", "ca"], indexable: false },
+  { slug: "zoosk", name: "Zoosk", homepage: "https://zoosk.com", category: "subscription-matchmaking", countryCodes: ["gb", "us", "ca", "za"], factsVerifiedAt: "2026-10-05", indexable: true },
+  { slug: "eharmony", name: "eharmony", homepage: "https://eharmony.com", category: "subscription-matchmaking", countryCodes: ["gb", "us", "ca"], factsVerifiedAt: "2026-10-05", indexable: true },
+  { slug: "grindr", name: "Grindr", homepage: "https://grindr.com", category: "community-specific", countryCodes: ["za", "gb", "us", "ca"], factsVerifiedAt: "2026-10-05", indexable: true },
   { slug: "badoo", name: "Badoo", homepage: "https://badoo.com", category: "swipe-first", countryCodes: ["ng", "za", "gb"], indexable: false },
 ];
 

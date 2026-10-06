@@ -28,3 +28,17 @@ export function appUrl(path: string): string {
 
 export const JOIN_URL = () => appUrl("/sign-up");
 export const SIGN_IN_URL = () => appUrl("/sign-in");
+
+/**
+ * The Android app listing.
+ *
+ * It is the DATE9JA app, not a DA8N one — there is no DA8N build. That is the
+ * same boundary every other member CTA on this site crosses (see the module
+ * note above), kept in one place so the cutover is one env change. There is no
+ * iOS listing to point at, which is why the iOS badge is a label.
+ */
+const DEFAULT_ANDROID_URL = "https://play.google.com/store/apps/details?id=love.date9ja.mobile";
+
+export function androidStoreUrl(): string {
+  return process.env.NEXT_PUBLIC_ANDROID_STORE_URL?.trim() || DEFAULT_ANDROID_URL;
+}

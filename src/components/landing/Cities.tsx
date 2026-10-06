@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { ImageSlot } from "../ImageSlot";
-import { ALL_CITIES_FACES, CITIES_SECTION, EXAMPLE_PROFILES, LANDING_CITIES } from "@/content/landing";
+import { Eyebrow } from "./Eyebrow";
+import {
+  ALL_CITIES_FACES,
+  CITIES_SECTION,
+  EXAMPLE_PROFILES,
+  LANDING_CITIES,
+  PLACES_EXAMPLE,
+} from "@/content/landing";
 import { findCity } from "@/content/cities";
 import { cityPath } from "@/lib/routing";
 
@@ -25,7 +32,7 @@ export function Cities() {
     <section id="cities" className="sec cities" aria-labelledby="cities-title">
       <div className="sec__in">
         <div className="cities__head">
-          <span className="eyebrow">{CITIES_SECTION.eyebrow}</span>
+          <Eyebrow num={CITIES_SECTION.num}>{CITIES_SECTION.eyebrow}</Eyebrow>
           <h2 id="cities-title" className="cities__title">
             {CITIES_SECTION.title}
             <span className="rose">{CITIES_SECTION.titleAccent}</span>
@@ -85,8 +92,17 @@ export function Cities() {
           </Link>
         </div>
 
+        {/*
+          v4 turns this block's explanatory sentence into a headline and lets
+          the rows carry the meaning. It only works because of the middle row:
+          "From Melbourne" under "Lives in Manchester" is the three-place model
+          stated as data instead of described in a paragraph.
+        */}
         <div className="places">
-          <p>{CITIES_SECTION.note}</p>
+          <p className="places__title">
+            {CITIES_SECTION.noteTitle}
+            <span className="rose">{CITIES_SECTION.noteAccent}</span>
+          </p>
           <div className="places__who">
             <ImageSlot
               src={EXAMPLE_PROFILES.maya.photo}
@@ -97,13 +113,15 @@ export function Cities() {
             {/*
               A definition list, not a grid of spans: these are label/value
               pairs, and <dl> is what says so to anything that is not a
-              browser. The design renders the same four cells.
+              browser. The design renders the same six cells.
             */}
             <dl className="places__kv">
               <dt>Lives in</dt>
-              <dd>Manchester</dd>
+              <dd>{PLACES_EXAMPLE.livesIn}</dd>
+              <dt>From</dt>
+              <dd>{PLACES_EXAMPLE.from}</dd>
               <dt>Open to</dt>
-              <dd className="green">London · Toronto · Worldwide</dd>
+              <dd className="green">{PLACES_EXAMPLE.openTo}</dd>
             </dl>
           </div>
         </div>

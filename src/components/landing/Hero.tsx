@@ -8,6 +8,12 @@ import { JOIN_URL } from "@/lib/app-links";
 /**
  * Hero.
  *
+ * v4 removed the handwritten line under the card ("Be the real you. / Your
+ * person wants the authentic you."). It sat in Caveat over the photograph at
+ * white-on-variable-photo, which is the one piece of text on the page whose
+ * contrast could not be guaranteed, and it said something the four pillars
+ * directly below say better. Nothing replaced it: the card is the subject.
+ *
  * The photograph is the design's own `hero-waterfront` (1536x1024), supplied
  * by the owner and re-encoded to JPEG. It is landscape, which matters: the
  * earlier stand-in was a 654x956 portrait and `cover` had to upscale it ~2.2x
@@ -106,21 +112,8 @@ export function Hero() {
                 {marcus.where}
               </span>
               <span className="pcard__intent">{marcus.intent}</span>
-              {/*
-                This card shows a named person with an age, a city, an online
-                state and a verification seal. It is an illustration of the
-                product, not a member. Saying so is the difference between a
-                mockup and a fabricated profile.
-              */}
-              <span className="pcard__example">Example profile</span>
             </figcaption>
           </figure>
-
-          <p className="hero__script">
-            {HERO.script[0]}
-            <br />
-            {HERO.script[1]}
-          </p>
         </div>
       </div>
     </section>

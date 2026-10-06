@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { breadcrumbJsonLd, buildPageMetadata, toJsonLdScript, webPageJsonLd } from "@/lib/seo";
-import { publicMarkets, findMarket } from "@/content/markets";
+import { publicMarkets, findMarket, marketInProse } from "@/content/markets";
 import { citiesInMarket } from "@/content/cities";
 import { cityPath, marketPath, resolveMarketSegment } from "@/lib/routing";
 import { CityChip, regionLabel } from "@/components/CityChip";
-import { AVAILABILITY, CITY_COPY, EDITORIAL_PENDING, JOIN_CTA, showJoinCta } from "@/content/route-copy";
+import { AVAILABILITY, CITY_COPY, JOIN_CTA, showJoinCta } from "@/content/route-copy";
 import { JOIN_URL } from "@/lib/app-links";
 
 /**
@@ -53,7 +53,7 @@ export async function generateMetadata({
   return buildPageMetadata({
     title: `Dating in ${city.name}`,
     description: `Meet people in ${city.name}${
-      market ? `, ${market.countryName}` : ""
+      market ? `, ${market.shortName}` : ""
     } on DA8N. See who is around and start a conversation.`,
     path: cityPath(city),
     // A city is capped by its market: both must be approved.
@@ -80,11 +80,11 @@ export default async function MarketSlugPage({ params }: { params: Promise<Param
     webPageJsonLd({
       path: cityPath(city),
       name: `Dating in ${city.name}`,
-      description: CITY_COPY.intro(city.name, market?.countryName),
+      description: CITY_COPY.intro(city.name, market && marketInProse(market)),
     }),
     breadcrumbJsonLd([
       { name: "DA8N", path: "/" },
-      { name: market?.countryName ?? city.countryCode, path: marketPath(city.countryCode) },
+      { name: market?.shortName ?? city.countryCode, path: marketPath(city.countryCode) },
       { name: city.name, path: cityPath(city) },
     ]),
   ];
@@ -99,7 +99,7 @@ export default async function MarketSlugPage({ params }: { params: Promise<Param
               /
             </span>
             <Link href={marketPath(city.countryCode)}>
-              {market?.countryName ?? city.countryCode}
+              {market?.shortName ?? city.countryCode}
             </Link>
             <span aria-hidden="true" className="crumbs__sep">
               /
@@ -115,7 +115,7 @@ export default async function MarketSlugPage({ params }: { params: Promise<Param
             Dating in <span className="rose">{city.name}</span>
           </h1>
           <p className="page__lede">
-            {CITY_COPY.intro(city.name, market?.countryName)}
+            {CITY_COPY.intro(city.name, market && marketInProse(market))}
             {market ? ` ${AVAILABILITY[market.status]}` : null}
           </p>
 
@@ -125,7 +125,7 @@ export default async function MarketSlugPage({ params }: { params: Promise<Param
                 {JOIN_CTA.label}
               </a>
               <Link href={marketPath(city.countryCode)} className="btn btn--ghost">
-                All of {market.countryName}
+                All of {market.shortName}
               </Link>
               <span className="page__note">{JOIN_CTA.note}</span>
             </div>
@@ -135,7 +135,7 @@ export default async function MarketSlugPage({ params }: { params: Promise<Param
         {related.length > 0 ? (
           <section className="page__section" aria-labelledby="nearby-heading">
             <h2 id="nearby-heading">{CITY_COPY.nearbyHeading}</h2>
-            <p>{CITY_COPY.nearbyLede(market?.countryName)}</p>
+            <p>{CITY_COPY.nearbyLede(market?.demonym)}</p>
             <ul className="chipgrid">
               {related.map((candidate) => (
                 <li key={candidate.slug}>
@@ -146,9 +146,6 @@ export default async function MarketSlugPage({ params }: { params: Promise<Param
           </section>
         ) : null}
 
-        <section className="page__section">
-          <p className="notice">{EDITORIAL_PENDING}</p>
-        </section>
       </div>
 
       <script

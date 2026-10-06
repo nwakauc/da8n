@@ -2,20 +2,41 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ImageSlot } from "../ImageSlot";
-import { Check, RealMeSeal } from "../icons";
-import { EXAMPLE_PROFILES, HOW, MAYA_PHOTOS, STEPS } from "@/content/landing";
+import { Bolt, Check, RealMeSeal } from "../icons";
+import { Eyebrow } from "./Eyebrow";
+import {
+  EXAMPLE_PROFILES,
+  HOW,
+  MAYA_PHOTOS,
+  READY_SCREEN,
+  REALME_CHECKS,
+  STEPS,
+} from "@/content/landing";
 
 const ACCENT: Record<string, string> = {
   ink: "var(--da8n-ink)",
   rose: "var(--da8n-rose)",
-  green: "var(--da8n-green)",
-  gold: "var(--da8n-gold)",
+  gold: "var(--da8n-gold-ink)",
+  "rose-ink": "var(--da8n-rose-ink)",
 };
 
 const ADVANCE_MS = 4500;
 
 /**
- * "How it works" — five steps, each with a phone screen.
+ * "How it works" — four steps, each with a phone screen.
+ *
+ * v4 changed three things here and each one is deliberate:
+ *
+ *   FOUR STEPS, NOT FIVE. See the note on `STEPS` in `content/landing.ts`.
+ *
+ *   NUMBERS, NOT DOTS. v3 marked each step with a coloured dot, which carried
+ *   no information: five dots in five colours told a reader nothing about order
+ *   and nothing about progress. The visible 01–04 is the rail now. It stays
+ *   `aria-hidden` — the tablist already announces "1 of 4".
+ *
+ *   `#ready` LIVES HERE. It used to be an id on the Ready panel in the
+ *   compatibility section, which v4 dissolved. The nav links to it, so the
+ *   anchor follows the explanation: step 04 is where Ready is described.
  *
  * ACCESSIBILITY DECISIONS, because this is the one component where they are
  * not obvious:
@@ -35,9 +56,9 @@ const ADVANCE_MS = 4500;
  *   machine, not a transition — CSS can stop the crossfade but not the timer.
  *
  *   Inactive panels are `aria-hidden` and `inert`-equivalent (pointer-events
- *   off in CSS, tabIndex -1 on nothing focusable inside). All five stay in the
- *   DOM so the crossfade has something to cross to, and so the content is in
- *   the HTML for crawlers.
+ *   off in CSS, nothing focusable inside). All four stay in the DOM so the
+ *   crossfade has something to cross to, and so the content is in the HTML for
+ *   crawlers.
  */
 export function HowItWorks() {
   const [active, setActive] = useState(0);
@@ -80,11 +101,19 @@ export function HowItWorks() {
     <section id="how" className="sec how" aria-labelledby="how-title">
       <div className="sec__in">
         <div className="how__col">
-          <span className="eyebrow">{HOW.eyebrow}</span>
+          <Eyebrow num={HOW.num}>{HOW.eyebrow}</Eyebrow>
           <h2 id="how-title" className="how__title">
             {HOW.title}
             <span className="rose">{HOW.titleAccent}</span>
           </h2>
+
+          {/*
+            The nav's "Ready" target. An empty span rather than an id on the
+            step button: the button is one of four tabs and the jump should land
+            on the section, not select a tab out from under the visitor. CSS
+            gives it scroll-margin so the heading is not under the sticky nav.
+          */}
+          <span id="ready" className="anchor" aria-hidden="true" />
 
           <div className="steps" role="tablist" aria-orientation="vertical" aria-label="How DA8N works">
             {STEPS.map((step, index) => (
@@ -106,7 +135,9 @@ export function HowItWorks() {
                 onPointerEnter={() => setHeld(true)}
                 onKeyDown={(event) => onKeyDown(event, index)}
               >
-                <span className="step__dot" aria-hidden="true" />
+                <span className="step__num" aria-hidden="true">
+                  {step.num}
+                </span>
                 <span className="step__body">
                   <b className="step__label">{step.label}</b>
                   <span className="step__detail">
@@ -155,11 +186,7 @@ function PhoneFrame({ children }: { readonly children: React.ReactNode }) {
   );
 }
 
-const { maya, marcus } = EXAMPLE_PROFILES;
-
-function MayaAvatar({ className }: { readonly className?: string }) {
-  return <ImageSlot src={maya.photo} alt="" placeholder="Photo" className={className} sizes="44px" />;
-}
+const { maya } = EXAMPLE_PROFILES;
 
 function PhoneScreen({ index }: { readonly index: number }) {
   if (index === 0) {
@@ -221,79 +248,74 @@ function PhoneScreen({ index }: { readonly index: number }) {
   if (index === 2) {
     return (
       <PhoneFrame>
-        <div className="phone__rowhead">
-          <b>For you</b>
-          <span>Picked for you</span>
-        </div>
+        <b className="phone__h phone__h--sm">RealMe</b>
+        <span className="phone__note">Verify before you send your first message.</span>
         <div className="phone__hero">
           <ImageSlot
-            src={marcus.photo}
+            src={maya.photo}
             alt=""
-            placeholder={marcus.name}
+            placeholder={maya.name}
             className="slot-fill"
             sizes="272px"
           />
           <div className="phone__heroCap">
             <b>
-              {marcus.name}
-              <RealMeSeal size={18} />
-            </b>
-            <span>New York · open to London</span>
-          </div>
-        </div>
-        <div className="phone__why">
-          <b>Why you may connect</b>
-          <span>Both want marriage · Both open to distance</span>
-        </div>
-      </PhoneFrame>
-    );
-  }
-
-  if (index === 3) {
-    return (
-      <PhoneFrame>
-        <b className="phone__h">RealMe</b>
-        <span className="phone__note">Verify before you send your first message.</span>
-        <div className="phone__id">
-          <MayaAvatar />
-          <span className="phone__avatarRow">
-            <b>
               {maya.name}
               <RealMeSeal size={18} />
             </b>
-          </span>
-        </div>
-        {["Government ID", "Live selfie", "Photos match"].map((label) => (
-          <div key={label} className="phone__check">
-            {label}
-            <span className="tick" style={{ width: 16, height: 16 }}>
-              <Check size={10} />
-            </span>
           </div>
-        ))}
+        </div>
+        <div className="phone__checks">
+          {REALME_CHECKS.map((label, position) => (
+            <div key={label} className="phone__check">
+              {label}
+              {/*
+                The ring is always there; the green disc inside it scales in,
+                one row at a time, when this panel becomes the active one. That
+                sequence is the whole point of the screen — it shows
+                verification as something that completes, not a row of
+                pre-ticked boxes. The delay is a CSS custom property so the
+                stagger is data, not three hand-written rules.
+              */}
+              <span className="phone__ring">
+                <span
+                  className="phone__tick"
+                  style={{ "--delay": `${0.6 + position * 0.7}s` } as React.CSSProperties}
+                >
+                  <Check size={10} />
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
       </PhoneFrame>
     );
   }
 
   return (
     <PhoneFrame>
-      <div className="phone__avatarRow">
-        <MayaAvatar />
-        <b>
-          {maya.firstName}
-          <RealMeSeal size={15} />
-        </b>
-      </div>
-      <div className="phone__msg">
-        Your photo from the Lisbon bookshop got me. I&apos;d love to hear the story over coffee
-        sometime.
-      </div>
-      <span className="phone__sent">Introduction sent</span>
-      <div className="phone__open">
-        <b>{maya.firstName} would like to meet you too</b>
-        <span>Your conversation is open.</span>
-      </div>
-      <div className="phone__cta">Say hello</div>
+      <b className="phone__h">{READY_SCREEN.heading}</b>
+      <span className="ready__orb" aria-hidden="true">
+        <Bolt size={52} />
+      </span>
+      <b className="ready__title">{READY_SCREEN.title}</b>
+      <span className="ready__sub">{READY_SCREEN.sub}</span>
+      <span className="ready__tags">
+        {READY_SCREEN.tags.map((tag) => (
+          <span key={tag}>{tag}</span>
+        ))}
+      </span>
+      {/*
+        A depiction of the switch, not a switch. It carries no role and no
+        state: making it a real `switch` would put a control in the tab order
+        that cannot change anything, which is worse than a picture of one.
+      */}
+      <span className="ready__row">
+        {READY_SCREEN.toggleLabel}
+        <span className="ready__track" aria-hidden="true">
+          <i />
+        </span>
+      </span>
     </PhoneFrame>
   );
 }

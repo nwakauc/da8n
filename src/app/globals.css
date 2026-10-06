@@ -224,67 +224,16 @@ main:focus-visible {
 }
 
 /*
- * The "not available yet" treatment.
+ * The hedging primitives — `.is-soon` (a "Soon" chip on a control with nowhere
+ * to go) and `.draft` (a stamp on copy that was not yet a commitment) — were
+ * removed on 2026-10-05.
  *
- * Three things on the landing page are deliberately NOT interactive, because
- * there is nothing behind them yet: the da8n+ and VIP tier CTAs, the "explore
- * all cities" tile, and the background-check request. That decision is right —
- * a live-looking control that starts nothing is worse than a label.
- *
- * It was being undermined by styling them identically to the controls that DO
- * work, which produced the worst outcome available: a button that looks real,
- * absorbs a click, and gives no feedback at all. This class is what makes the
- * difference visible — flat, muted, no shadow, no pointer, and a "Soon" chip
- * via ::after so the reason is on the element rather than in a comment.
+ * They are not coming back as styling. Every control they covered now has a
+ * real destination, and `landing.test.ts` asserts each one resolves. If a
+ * future control genuinely has nowhere to go, the fix is to build the page or
+ * not to ship the control — not to style the dead end.
  */
-.is-soon {
-  position: relative;
-  background: var(--da8n-sand) !important;
-  color: var(--da8n-muted) !important;
-  border: 1.5px dashed var(--da8n-line-strong) !important;
-  box-shadow: none !important;
-  cursor: default;
-}
-/*
- * Inline variant, for a label sitting in running text rather than in a button
- * box — the background-check line inside the example Safety Profile. The block
- * treatment would read as a broken button there, so this keeps the text flow
- * and just removes the link signals: no rose, no underline, no arrow.
- */
-.is-soon--inline {
-  background: transparent !important;
-  border: 0 !important;
-  color: var(--da8n-muted) !important;
-  font-weight: 700;
-}
 
-.is-soon::after {
-  content: "Soon";
-  margin-left: 8px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: var(--da8n-cream-lift);
-  border: 1px solid var(--da8n-line);
-  font: 800 10px var(--font-manrope), sans-serif;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--da8n-muted);
-  white-space: nowrap;
-}
-
-/* The DRAFT stamp. The design uses it to mark copy that is not yet a
-   commitment; we reuse it rather than inventing a second idiom. */
-.draft {
-  display: inline-block;
-  margin-left: 4px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: #fff6e0;
-  color: #9a6500;
-  font: 800 11px var(--font-manrope), sans-serif;
-  letter-spacing: 0.08em;
-  vertical-align: middle;
-}
 
 /* ---- Content routes -------------------------------------------------- */
 /*
@@ -415,13 +364,48 @@ main:focus-visible {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  /*
+   * Every card the same height, including across rows.
+   *
+   * `1fr` on auto rows makes each row as tall as the tallest card in the grid
+   * rather than as tall as its own content, so a single wrapping label cannot
+   * leave one card standing proud of its neighbours. That was visible on the
+   * market pages: "United Kingdom" and "United Arab Emirates" wrapped onto two
+   * lines and those two cards grew while the rest of the row stayed short.
+   *
+   * The labels are short now, so nothing wraps — but the label set is data,
+   * and the next market added should not be able to break the grid. This makes
+   * it a property of the layout instead of a property of the current copy.
+   */
+  grid-auto-rows: 1fr;
 }
+/* The <li> is the grid item; it has to stretch and pass that on to the link,
+   or the card sits at its content height inside a full-height cell. */
+.chipgrid > li {
+  display: flex;
+}
+/*
+ * Name above region, not beside it.
+ *
+ * Side by side with `space-between` looked tidy for short pairs and could not
+ * hold a long one: "Johannesburg" plus "Gauteng" needs more than the ~178px a
+ * column gets at desktop, and because neither flex item can shrink below its
+ * word, the region escaped the card and overlapped its neighbour. Stacking
+ * removes the constraint entirely — a chip is now as wide as its column
+ * whatever is in it, and `grid-auto-rows: 1fr` keeps every card the same
+ * height regardless.
+ */
 .chip-link {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  height: 100%;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  /* Belt and braces for a place name longer than any column: break it rather
+     than paint outside the card. */
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 14px 16px;
   border-radius: 14px;
   background: var(--da8n-white);
@@ -442,7 +426,6 @@ main:focus-visible {
 .chip-link span {
   font: 500 12.5px var(--font-manrope), sans-serif;
   color: var(--da8n-faint);
-  text-align: right;
 }
 
 /*
@@ -456,7 +439,6 @@ main:focus-visible {
   border-radius: 14px;
   background: var(--da8n-cream-lift);
   border: 1px solid var(--da8n-line);
-  border-left: 3px solid var(--da8n-gold);
   font: 500 15px/1.6 var(--font-manrope), sans-serif;
   color: var(--da8n-ink-soft);
   max-width: 44em;
@@ -470,8 +452,24 @@ main:focus-visible {
   line-height: 1.7;
   color: var(--da8n-ink-soft);
 }
-.prose > * + * {
+/*
+ * Flow spacing has to reach INSIDE `<section>`, not just across the top level.
+ *
+ * The legal pages render a flat run of `<p>`/`<h2>`, where `> * + *` is
+ * enough. The guides and product pages wrap each heading and its body in a
+ * `<section>` — correct markup, and it quietly broke the spacing: every
+ * paragraph became a first child, so nothing got a margin and whole sections
+ * ran together as one block of text.
+ *
+ * `:where()` keeps the specificity at zero so the heading and list rules below
+ * still win without needing `!important`.
+ */
+.prose > * + *,
+.prose :where(section) > * + * {
   margin-top: 1.1em;
+}
+.prose > section + section {
+  margin-top: 0;
 }
 .prose h2 {
   margin-top: 2.2em;
@@ -488,9 +486,21 @@ main:focus-visible {
   font-weight: 800;
   color: var(--da8n-ink);
 }
+/*
+ * `list-style: none` is reset globally for the landing page's many unstyled
+ * lists, so prose lists have to ask for their markers back — without this the
+ * bullets in the guides render as unindented, undifferentiated lines.
+ */
 .prose ul {
   margin-left: 0;
-  padding-left: 1.2em;
+  padding-left: 1.3em;
+  list-style: disc;
+}
+.prose ul li {
+  display: list-item;
+}
+.prose ul li::marker {
+  color: var(--da8n-rose);
 }
 .prose li + li {
   margin-top: 0.45em;
@@ -556,7 +566,6 @@ main:focus-visible {
   border-radius: 14px;
   background: #fff6e0;
   border: 1px solid #f0dca8;
-  border-left: 3px solid var(--da8n-gold);
 }
 .legal-banner b {
   font: 800 13px var(--font-manrope), sans-serif;
@@ -709,4 +718,216 @@ main:focus-visible {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---- Guides ----------------------------------------------------------- */
+
+/*
+ * The guide index's cards, and the sources list at the foot of each article.
+ *
+ * `.sources` is not decoration. The scam guide tells people what to do about
+ * financial fraud and the distance guide tells them never to wire money —
+ * advice like that is only worth publishing if a reader can check where it came
+ * from, so every guide renders its sources and external ones are `nofollow`.
+ */
+.gcards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(18px, 2.2vw, 24px);
+}
+@media (min-width: 720px) {
+  .gcards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.gcard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(22px, 2.4vw, 28px);
+  background: var(--da8n-white);
+  border: 2px solid var(--da8n-ink);
+  border-radius: 22px;
+  box-shadow: 6px 6px 0 var(--da8n-gold);
+  color: var(--da8n-ink);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gcard:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0 var(--da8n-gold);
+  }
+}
+.gcard:hover {
+  color: var(--da8n-ink);
+}
+.gcard__kicker {
+  font: 800 12px var(--font-manrope), sans-serif;
+  letter-spacing: 0.12em;
+  color: var(--da8n-gold-ink);
+}
+.gcard h2 {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(21px, 2.2vw, 25px);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.gcard p {
+  margin: 0;
+  flex: 1;
+  font: 500 15.5px/1.6 var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+  text-wrap: pretty;
+}
+.gcard__more {
+  font: 800 15px var(--font-manrope), sans-serif;
+  color: var(--da8n-green);
+}
+
+.sources {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sources li {
+  padding: 10px 0;
+  border-top: 1px solid var(--da8n-line);
+  font: 500 15px/1.5 var(--font-manrope), sans-serif;
+}
+
+/*
+ * Deep links land on the heading, not under the header. `/safety#background-checks`
+ * is linked from the landing page's Safety Profile card, so this is load-bearing.
+ */
+.prose h2[id] {
+  scroll-margin-top: 96px;
+}
+
+/*
+ * Questions on a programmatic page (`/audiences/{slug}`, `/compare/{slug}`).
+ *
+ * Deliberately the landing page's FAQ pattern at a page's scale rather than a
+ * second disclosure design: a visitor who has seen the landing page should
+ * recognise this. Native `<details>`, so the keyboard behaviour and the
+ * expanded-state announcement are the platform's and not ours, and every
+ * answer is in the HTML whether or not it is open — which is what makes the
+ * FAQPage structured data on these routes truthful.
+ */
+.qa {
+  display: grid;
+  gap: 12px;
+}
+.qa__item {
+  background: var(--da8n-white);
+  border: 1px solid var(--da8n-line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.qa__q {
+  list-style: none;
+  padding: 18px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  font: 700 17px/1.4 var(--font-bricolage), sans-serif;
+  color: var(--da8n-ink);
+}
+.qa__q::-webkit-details-marker {
+  display: none;
+}
+.qa__q i {
+  font: 400 22px var(--font-manrope), sans-serif;
+  font-style: normal;
+  color: var(--da8n-green);
+  flex: none;
+  transition: transform 0.18s ease;
+}
+.qa__item[open] .qa__q i {
+  transform: rotate(45deg);
+}
+.qa__item > p {
+  margin: 0;
+  padding: 0 22px 20px;
+  font: 500 16px/1.65 var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+  max-width: 46em;
+}
+
+/*
+ * `/contact` — one card per route.
+ *
+ * A grid rather than a stack of prose sections, because the whole job of this
+ * page is to let someone find THEIR row and leave. Each card carries its
+ * audience label, so the scan is "which of these am I" rather than reading
+ * four paragraphs to find out.
+ */
+.routes {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+@media (min-width: 760px) {
+  .routes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.route {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 24px;
+  background: var(--da8n-white);
+  border: 1px solid var(--da8n-line);
+  border-radius: 18px;
+}
+/* `--da8n-rose-ink`, not `--da8n-faint`. Faint is 3.4:1 and documented at the
+   top of this file as large-text-and-labels only; an 11px uppercase kicker is
+   small text by WCAG's measure (large = 18.66px bold / 24px regular) whatever
+   it looks like, so it needs 4.5:1. Same token the page kicker uses. */
+.route__kicker {
+  font: 800 11px/1 var(--font-manrope), sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--da8n-rose-ink);
+}
+.route h2 {
+  margin: 0;
+  font: 800 clamp(19px, 2.2vw, 23px)/1.2 var(--font-bricolage), sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--da8n-ink);
+}
+.route p {
+  margin: 0;
+  font: 500 15.5px/1.65 var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
+}
+/* The destination is the point of the card, so it is the one thing in it that
+   looks like an action. `margin-top: auto` keeps it on the card's bottom edge
+   whatever the paragraph length, so a row of cards aligns. */
+.route__to {
+  margin-top: auto;
+  padding-top: 6px;
+  font: 700 15.5px var(--font-manrope), sans-serif;
+  color: var(--da8n-green);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.route__to:hover {
+  color: var(--da8n-ink);
+}
+/* Body text at 14px, so `--da8n-muted` (6.3:1) rather than faint. */
+.route__pending {
+  font: 500 14px/1.6 var(--font-manrope), sans-serif;
+  color: var(--da8n-muted);
 }

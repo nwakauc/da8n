@@ -24,7 +24,24 @@ export type MarketStatus =
 export type Market = {
   /** ISO 3166-1 alpha-2, lowercase. `gb`, never `uk` — see ROUTING.md. */
   readonly countryCode: string;
+  /** Formal name. Used where a document needs one, e.g. structured data. */
   readonly countryName: string;
+  /**
+   * How the market is LABELLED in the interface — "UK", not "United Kingdom".
+   *
+   * The long forms wrapped onto two lines in the market chip grid, which made
+   * those cards taller than their neighbours, and "United Kingdom" sitting
+   * next to the routing code "GB" read as a contradiction to anyone who does
+   * not know ISO 3166 reserves `uk`. Note this changes LABELS only: the route
+   * grammar is still `gb`, never `uk` — see `lib/routing.ts`.
+   */
+  readonly shortName: string;
+  /**
+   * Whether the short name takes "the" in a sentence. English needs it for
+   * "the UK", "the US" and "the UAE" and refuses it for "Nigeria", and
+   * without it every market H1 read "Dating in United Kingdom".
+   */
+  readonly article: boolean;
   /** Demonym used in copy, e.g. "Nigerian". Not derivable from the code. */
   readonly demonym: string;
   readonly status: MarketStatus;
@@ -51,6 +68,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "ng",
     countryName: "Nigeria",
+    shortName: "Nigeria",
+    article: false,
     demonym: "Nigerian",
     status: "live",
     indexable: false,
@@ -63,6 +82,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "za",
     countryName: "South Africa",
+    shortName: "South Africa",
+    article: false,
     demonym: "South African",
     status: "acquisition",
     indexable: false,
@@ -75,6 +96,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "gb",
     countryName: "United Kingdom",
+    shortName: "UK",
+    article: true,
     demonym: "British",
     status: "acquisition",
     indexable: false,
@@ -87,6 +110,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "us",
     countryName: "United States",
+    shortName: "US",
+    article: true,
     demonym: "American",
     status: "acquisition",
     indexable: false,
@@ -99,6 +124,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "ca",
     countryName: "Canada",
+    shortName: "Canada",
+    article: false,
     demonym: "Canadian",
     status: "acquisition",
     indexable: false,
@@ -112,6 +139,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "au",
     countryName: "Australia",
+    shortName: "Australia",
+    article: false,
     demonym: "Australian",
     /*
      * Promoted from "planned" to "acquisition" because the approved landing
@@ -132,6 +161,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "ae",
     countryName: "United Arab Emirates",
+    shortName: "UAE",
+    article: true,
     demonym: "Emirati",
     status: "acquisition",
     indexable: false,
@@ -146,6 +177,8 @@ export const MARKETS: readonly Market[] = [
   {
     countryCode: "fr",
     countryName: "France",
+    shortName: "France",
+    article: false,
     demonym: "French",
     status: "acquisition",
     indexable: false,
@@ -159,6 +192,17 @@ export const MARKETS: readonly Market[] = [
     relatedCountryCodes: ["gb", "ca"],
   },
 ];
+
+/**
+ * The market as a sentence fragment: "the UK", "Nigeria".
+ *
+ * Every piece of prose that names a market goes through this, so the article
+ * is decided once in the catalog rather than by whoever writes the next
+ * template string.
+ */
+export function marketInProse(market: Market): string {
+  return market.article ? `the ${market.shortName}` : market.shortName;
+}
 
 export function findMarket(countryCode: string): Market | undefined {
   const code = countryCode.trim().toLowerCase();

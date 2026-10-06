@@ -5,7 +5,7 @@ import { publicMarkets } from "@/content/markets";
 import { citiesInMarket } from "@/content/cities";
 import { marketPath } from "@/lib/routing";
 import { CityChip } from "@/components/CityChip";
-import { AVAILABILITY, EDITORIAL_PENDING, JOIN_CTA } from "@/content/route-copy";
+import { AVAILABILITY, JOIN_CTA } from "@/content/route-copy";
 import { JOIN_URL } from "@/lib/app-links";
 
 const DESCRIPTION =
@@ -101,7 +101,7 @@ export default function CitiesIndexPage() {
           return (
             <section key={market.countryCode} className="page__section" aria-labelledby={headingId}>
               <h2 id={headingId}>
-                <Link href={marketPath(market.countryCode)}>{market.countryName}</Link>
+                <Link href={marketPath(market.countryCode)}>{market.shortName}</Link>
               </h2>
               <p>{AVAILABILITY[market.status]}</p>
               <ul className="chipgrid">
@@ -115,9 +115,6 @@ export default function CitiesIndexPage() {
           );
         })}
 
-        <section className="page__section">
-          <p className="notice">{EDITORIAL_PENDING}</p>
-        </section>
       </div>
 
       <script

@@ -1,3 +1,4 @@
+import { Eyebrow } from "./Eyebrow";
 import { PillarGlyph } from "../icons";
 import { PILLARS, WHY } from "@/content/landing";
 
@@ -25,7 +26,7 @@ export function WhyDa8n() {
     <section id="why" className="sec why" aria-labelledby="why-title">
       <div className="sec__in">
         <div className="why__head">
-          <span className="eyebrow">{WHY.eyebrow}</span>
+          <Eyebrow num={WHY.num}>{WHY.eyebrow}</Eyebrow>
           <h2 id="why-title" className="why__title">
             {WHY.title}
             <span className="rose">{WHY.titleAccent}</span>

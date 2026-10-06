@@ -1,22 +1,31 @@
+import Link from "next/link";
 import { ImageSlot } from "../ImageSlot";
-import { Check, RealMeSeal, SafetyGlyph, Shield } from "../icons";
+import { Check, Flag, RealMeSeal, SealOutline, Shield } from "../icons";
+import { Eyebrow } from "./Eyebrow";
 import {
+  CHAT_WARNING,
   CHECK_IN,
   EXAMPLE_PROFILES,
   SAFETY,
-  SAFETY_FEATURES,
+  SAFETY_CARDS,
   SAFETY_PROFILE,
 } from "@/content/landing";
 
 const ACCENT: Record<string, string> = {
   green: "var(--da8n-green)",
-  gold: "var(--da8n-gold-ink)",
-  ink: "var(--da8n-ink)",
+  gold: "var(--da8n-gold)",
   rose: "var(--da8n-rose)",
 };
 
+const CARD_GLYPH = {
+  seal: SealOutline,
+  shield: Shield,
+  block: Flag,
+} as const;
+
 /**
- * Safety, including the example Safety Profile card.
+ * Safety: three capability cards, the example Safety Profile, the in-chat fraud
+ * warning and Date Check-in.
  *
  * WHAT THIS CARD MUST NEVER SHOW, and does not:
  *   identity documents or their images; report history; who filed a report;
@@ -40,15 +49,48 @@ export function Safety() {
     <section id="safety" className="sec safety" aria-labelledby="safety-title">
       <div className="sec__in">
         <div className="safety__head">
-          <span className="eyebrow">{SAFETY.eyebrow}</span>
+          <Eyebrow num={SAFETY.num}>{SAFETY.eyebrow}</Eyebrow>
           <h2 id="safety-title" className="safety__title">
             {SAFETY.title}
             <span className="rose">{SAFETY.titleAccent}</span>
             {SAFETY.titleTail}
           </h2>
-          <p className="safety__claim">{SAFETY.claim}</p>
-          <p className="safety__body">{SAFETY.body}</p>
         </div>
+
+        {/*
+          Three cards where v3 had a six-row list, and the two lines of
+          "powered by D8N Safety" prose above it. Three capabilities that exist,
+          described in a sentence each, beats six one-liners of which two named
+          things that are not built.
+
+          Each card links to its own explainer on this site — `/realme`, the
+          romance-scam guide and `/safety`. `landing.test.ts` asserts all three
+          resolve, so a renamed route fails the build rather than the page.
+        */}
+        <ol className="scards">
+          {SAFETY_CARDS.map((card) => {
+            const Glyph = CARD_GLYPH[card.icon];
+            return (
+              <li
+                key={card.title}
+                className="scard"
+                style={{ "--accent": ACCENT[card.accent] } as React.CSSProperties}
+              >
+                <div className="scard__top">
+                  <span className="scard__kicker">{card.kicker}</span>
+                  <i className="orb orb--md">
+                    <Glyph size={22} />
+                  </i>
+                </div>
+                <h3>{card.title}</h3>
+                <p>{card.body}</p>
+                <Link href={card.href} className="scard__link">
+                  {card.cta} <span aria-hidden="true">→</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ol>
 
         <div className="safety__split">
           <div className="sprofile">
@@ -125,20 +167,16 @@ export function Safety() {
                 </li>
                 <li className="link">
                   {/*
-                    Not a link. Background checks are consent-based, bound to a
-                    provider and legal in different ways market by market;
-                    there is no flow behind this yet.
-
-                    It was styled as bold rose text with a trailing arrow,
-                    i.e. exactly like every real link on the page, so it read
-                    as a live control that silently did nothing. `.is-soon
-                    --inline` keeps it as a label but makes that legible, and
-                    the arrow is gone from the copy because an arrow is a
-                    promise of navigation.
+                    Points at the explainer, not at a flow. Background checks
+                    are consent-based, provider-bound and available in
+                    different ways market by market, so what a visitor needs
+                    from this row is the explanation; the request itself lives
+                    in the member app, where the consent is captured.
                   */}
-                  <span className="is-soon is-soon--inline">
+                  <Link href={SAFETY_PROFILE.backgroundCheck.href}>
                     {SAFETY_PROFILE.backgroundCheck.cta}
-                  </span>
+                    <span aria-hidden="true"> →</span>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -147,21 +185,34 @@ export function Safety() {
           </div>
 
           <div className="safety__col">
-            <div className="sfeatures">
-              {SAFETY_FEATURES.map((feature) => (
-                <div key={feature.title} className="sfeature">
-                  <i
-                    className="orb orb--md"
-                    style={{ "--accent": ACCENT[feature.accent] } as React.CSSProperties}
-                  >
-                    <SafetyGlyph name={feature.icon} />
-                  </i>
-                  <div>
-                    <b>{feature.title}</b>
-                    <span>{feature.body}</span>
-                  </div>
-                </div>
-              ))}
+            {/*
+              The fraud claim, shown rather than asserted. Nothing here is a
+              real message, member or report — see `CHAT_WARNING`. The Report
+              and Learn more pills are part of the depiction and carry no role:
+              they are what the member would see, not controls on this page.
+            */}
+            <div className="chatwarn">
+              <div className="chatwarn__top">
+                <span className="chatwarn__label">{CHAT_WARNING.label}</span>
+                <span className="chatwarn__flag">
+                  <span className="dot dot--rose" />
+                  {CHAT_WARNING.flag}
+                </span>
+              </div>
+              <div className="chatwarn__msg">
+                <span className="chatwarn__avatar" aria-hidden="true">
+                  {CHAT_WARNING.sender}
+                </span>
+                <div className="chatwarn__bubble">{CHAT_WARNING.message}</div>
+              </div>
+              <p className="chatwarn__verdict">
+                <b>{CHAT_WARNING.verdictLead}</b>
+                {CHAT_WARNING.verdictRest}
+              </p>
+              <div className="chatwarn__acts" aria-hidden="true">
+                <span>{CHAT_WARNING.report}</span>
+                <span>{CHAT_WARNING.learn}</span>
+              </div>
             </div>
 
             <div className="checkin">

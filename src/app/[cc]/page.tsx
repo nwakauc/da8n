@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { breadcrumbJsonLd, buildPageMetadata, toJsonLdScript, webPageJsonLd } from "@/lib/seo";
-import { publicMarkets } from "@/content/markets";
+import { publicMarkets, marketInProse } from "@/content/markets";
 import { citiesInMarket } from "@/content/cities";
 import { marketPath, resolveTopLevel } from "@/lib/routing";
 import { CityChip } from "@/components/CityChip";
-import { AVAILABILITY, EDITORIAL_PENDING, JOIN_CTA, MARKET_COPY, showJoinCta } from "@/content/route-copy";
+import { MarketChip } from "@/components/MarketChip";
+import { AVAILABILITY, JOIN_CTA, MARKET_COPY, showJoinCta } from "@/content/route-copy";
 import { JOIN_URL } from "@/lib/app-links";
 
 /**
@@ -44,8 +45,8 @@ export async function generateMetadata({
 
   const { market } = resolved;
   return buildPageMetadata({
-    title: `Dating in ${market.countryName}`,
-    description: `Meet people in ${market.countryName} on DA8N. One global network, localized for ${market.countryName}.`,
+    title: `Dating in ${marketInProse(market)}`,
+    description: `Meet people in ${marketInProse(market)} on DA8N. One global network, localized for ${marketInProse(market)}.`,
     path: marketPath(market.countryCode),
     // Gated on the market's own approval. No market is approved yet.
     indexable: market.indexable,
@@ -72,12 +73,12 @@ export default async function MarketPage({ params }: { params: Promise<Params> }
   const jsonLd = [
     webPageJsonLd({
       path: marketPath(market.countryCode),
-      name: `Dating in ${market.countryName}`,
+      name: `Dating in ${marketInProse(market)}`,
       description: MARKET_COPY.intro(market),
     }),
     breadcrumbJsonLd([
       { name: "DA8N", path: "/" },
-      { name: market.countryName, path: marketPath(market.countryCode) },
+      { name: market.shortName, path: marketPath(market.countryCode) },
     ]),
   ];
 
@@ -90,12 +91,12 @@ export default async function MarketPage({ params }: { params: Promise<Params> }
             <span aria-hidden="true" className="crumbs__sep">
               /
             </span>
-            <span aria-current="page">{market.countryName}</span>
+            <span aria-current="page">{market.shortName}</span>
           </nav>
 
           <span className="page__kicker">{MARKET_COPY.kicker}</span>
           <h1 className="page__title">
-            Dating in <span className="rose">{market.countryName}</span>
+            Dating in <span className="rose">{marketInProse(market)}</span>
           </h1>
           <p className="page__lede">
             {MARKET_COPY.intro(market)} {AVAILABILITY[market.status]}
@@ -131,18 +132,12 @@ export default async function MarketPage({ params }: { params: Promise<Params> }
           <ul className="chipgrid">
             {elsewhere.map((candidate) => (
               <li key={candidate.countryCode}>
-                <Link href={marketPath(candidate.countryCode)} className="chip-link">
-                  <b>{candidate.countryName}</b>
-                  <span>{candidate.countryCode.toUpperCase()}</span>
-                </Link>
+                <MarketChip market={candidate} />
               </li>
             ))}
           </ul>
         </section>
 
-        <section className="page__section">
-          <p className="notice">{EDITORIAL_PENDING}</p>
-        </section>
       </div>
 
       <script

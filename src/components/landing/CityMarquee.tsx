@@ -1,6 +1,12 @@
 import { MARQUEE_CITIES } from "@/content/landing";
 
-const ACCENTS = ["var(--da8n-ink)", "var(--da8n-rose)", "var(--da8n-green)"] as const;
+/*
+ * v4 inverts the band: dark ground, light type. The accents are therefore the
+ * light set — cream, rose-lift and a warm gold — all of which clear 4.5:1 on
+ * #231c17 at the band's size. The v3 trio (ink, rose, green) would have been
+ * invisible to near-invisible on it.
+ */
+const ACCENTS = ["#ffffff", "var(--da8n-rose-lift)", "#f6c453"] as const;
 
 /**
  * Scrolling city band.
@@ -42,11 +48,19 @@ export function CityMarquee() {
       </span>,
     ]);
 
+  /*
+   * The extra wrapper is structural, not decorative. The band is rotated and
+   * bled past both gutters, and it is pulled up over the bottom of the hero —
+   * so it needs an un-rotated, overflow-clipping parent, or the rotation
+   * widens the document and the page scrolls sideways on every viewport.
+   */
   return (
     <div className="marquee" aria-hidden="true">
-      <div className="marquee__row">
-        {row("a")}
-        {row("b")}
+      <div className="marquee__band">
+        <div className="marquee__row">
+          {row("a")}
+          {row("b")}
+        </div>
       </div>
     </div>
   );

@@ -275,6 +275,29 @@ export function Block({ size = 18 }: IconProps) {
   );
 }
 
+/**
+ * A raised flag — reporting. The design uses this path for the REPORTING card;
+ * `Block` (a crossed circle) is the blocking half of the same idea and the two
+ * are not interchangeable, so both exist.
+ */
+export function Flag({ size = 18 }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 21V4.5m0 0c3-1.8 6-1.8 9 0 1 .6 2.2.7 3.5.2v9.2c-1.3.5-2.5.4-3.5-.2-3-1.8-6-1.8-9 0" />
+    </svg>
+  );
+}
+
 export function Book({ size = 18 }: IconProps) {
   return (
     <svg
@@ -313,21 +336,14 @@ export function Pin({ size = 18 }: IconProps) {
   );
 }
 
-const SAFETY_GLYPHS = {
-  shield: Shield,
-  doc: Doc,
-  alert: Alert,
-  block: Block,
-  book: Book,
-  pin: Pin,
-} as const;
-
-export type SafetyGlyphName = keyof typeof SAFETY_GLYPHS;
-
-export function SafetyGlyph({ name }: { readonly name: SafetyGlyphName }) {
-  const Glyph = SAFETY_GLYPHS[name];
-  return <Glyph size={18} />;
-}
+/*
+ * `SafetyGlyph` — the name-to-glyph lookup for v3's six-row safety list — was
+ * removed with that list. v4's three safety cards pick their glyph in
+ * `Safety.tsx` from a three-entry map, which is short enough not to need an
+ * indirection here. `Doc`, `Alert`, `Block`, `Book` and `Pin` above are kept:
+ * they are the icon set for the safety capabilities, and `/safety` and
+ * `/realme` are routes this site is going to build.
+ */
 
 const PILLAR_GLYPHS = {
   seal: SealOutline,

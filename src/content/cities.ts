@@ -16,6 +16,13 @@ export type City = {
   readonly countryCode: string;
   /** State, province or region, where it is part of how people name the place. */
   readonly region?: string;
+  /**
+   * How the region is LABELLED in a chip, where the full name is too long to
+   * sit on one line beside the city — "NSW", not "New South Wales". Only set
+   * it where the abbreviation is the form people actually use; most regions
+   * are short enough and fall back to `region`.
+   */
+  readonly regionShort?: string;
   /** Alternative spellings/names that must redirect here. Never served. */
   readonly aliases?: readonly string[];
   /**
@@ -42,7 +49,7 @@ export const CITIES: readonly City[] = [
   { slug: "cape-town", name: "Cape Town", countryCode: "za", region: "Western Cape", indexable: false, relatedCitySlugs: ["johannesburg", "gqeberha"] },
   { slug: "johannesburg", name: "Johannesburg", countryCode: "za", region: "Gauteng", aliases: ["joburg", "jozi"], indexable: false, relatedCitySlugs: ["pretoria", "cape-town"] },
   { slug: "pretoria", name: "Pretoria", countryCode: "za", region: "Gauteng", aliases: ["tshwane"], indexable: false, relatedCitySlugs: ["johannesburg"] },
-  { slug: "durban", name: "Durban", countryCode: "za", region: "KwaZulu-Natal", indexable: false, relatedCitySlugs: ["johannesburg", "cape-town"] },
+  { slug: "durban", name: "Durban", countryCode: "za", region: "KwaZulu-Natal", regionShort: "KZN", indexable: false, relatedCitySlugs: ["johannesburg", "cape-town"] },
   { slug: "gqeberha", name: "Gqeberha", countryCode: "za", region: "Eastern Cape", aliases: ["port-elizabeth"], indexable: false, relatedCitySlugs: ["cape-town", "durban"] },
   { slug: "bloemfontein", name: "Bloemfontein", countryCode: "za", region: "Free State", aliases: ["mangaung"], indexable: false, relatedCitySlugs: ["johannesburg"] },
 
@@ -60,7 +67,7 @@ export const CITIES: readonly City[] = [
 
   // Canada
   { slug: "toronto", name: "Toronto", countryCode: "ca", region: "Ontario", indexable: false, relatedCitySlugs: ["ottawa", "vancouver"] },
-  { slug: "vancouver", name: "Vancouver", countryCode: "ca", region: "British Columbia", indexable: false, relatedCitySlugs: ["calgary", "toronto"] },
+  { slug: "vancouver", name: "Vancouver", countryCode: "ca", region: "British Columbia", regionShort: "BC", indexable: false, relatedCitySlugs: ["calgary", "toronto"] },
   { slug: "calgary", name: "Calgary", countryCode: "ca", region: "Alberta", indexable: false, relatedCitySlugs: ["vancouver", "toronto"] },
   { slug: "ottawa", name: "Ottawa", countryCode: "ca", region: "Ontario", indexable: false, relatedCitySlugs: ["toronto"] },
 
@@ -68,7 +75,7 @@ export const CITIES: readonly City[] = [
   // landing design put Sydney on the city grid, so both of these are routed
   // and in the build. (This comment said `planned` long after that stopped
   // being true.)
-  { slug: "sydney", name: "Sydney", countryCode: "au", region: "New South Wales", indexable: false, relatedCitySlugs: ["melbourne"] },
+  { slug: "sydney", name: "Sydney", countryCode: "au", region: "New South Wales", regionShort: "NSW", indexable: false, relatedCitySlugs: ["melbourne"] },
   { slug: "melbourne", name: "Melbourne", countryCode: "au", region: "Victoria", indexable: false, relatedCitySlugs: ["sydney"] },
 
   // UAE and France. Added because the approved landing design puts Dubai and
@@ -76,7 +83,7 @@ export const CITIES: readonly City[] = [
   { slug: "dubai", name: "Dubai", countryCode: "ae", region: "Dubai", indexable: false, relatedCitySlugs: ["abu-dhabi"] },
   { slug: "abu-dhabi", name: "Abu Dhabi", countryCode: "ae", region: "Abu Dhabi", indexable: false, relatedCitySlugs: ["dubai"] },
   { slug: "paris", name: "Paris", countryCode: "fr", region: "Île-de-France", indexable: false, relatedCitySlugs: ["lyon"] },
-  { slug: "lyon", name: "Lyon", countryCode: "fr", region: "Auvergne-Rhône-Alpes", indexable: false, relatedCitySlugs: ["paris"] },
+  { slug: "lyon", name: "Lyon", countryCode: "fr", region: "Auvergne-Rhône-Alpes", regionShort: "Auvergne", indexable: false, relatedCitySlugs: ["paris"] },
 ];
 
 export function findCity(countryCode: string, slug: string): City | undefined {

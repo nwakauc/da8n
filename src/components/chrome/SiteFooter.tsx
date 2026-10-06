@@ -60,9 +60,12 @@ export function SiteFooter() {
                 {link.label}
               </Link>
             ))}
-            {/* `#cities` is the grid on the landing page; there is no /cities
-                index route yet. */}
-            <Link href="/#cities">All cities</Link>
+            {/* `/cities` is a real index route now. This pointed at
+                `/#cities`, the grid on the landing page — which was correct
+                when written and became a worse answer the moment the index
+                existed, because it sent anyone wanting the full list back to
+                the marketing page to scroll. */}
+            <Link href="/cities">All cities</Link>
           </div>
         </div>
 

@@ -14,14 +14,22 @@ import { Awaiting, LegalHeader, LegalReviewBanner } from "@/components/legal/Leg
  * they have not seen, and it would leave the actual membership contract
  * undisplayed at the point it is entered.
  *
- * Section 4 is the one that is doing real work. The landing page shows
- * membership tiers with prices absent, feature lists that include unbuilt
- * capabilities, example profiles of people who do not exist, and placeholder
- * couple stories. Each of those is already labelled in the interface — DRAFT
- * stamps, "Example profile", "Illustration — not yet a real member story" —
- * and section 4 is the matching statement in the terms, so the position is
- * consistent in both places rather than only in the one a regulator is less
- * likely to read.
+ * Section 4 is the one that is doing real work, and it was REWRITTEN on
+ * 2026-10-05 when the interface labels came off.
+ *
+ * It used to say that the site's claims were "already labelled in the
+ * interface — DRAFT stamps, 'Example profile', 'Illustration — not yet a real
+ * member story'". Those labels no longer exist: the product is live and the
+ * marketing is written accordingly. Leaving that sentence in the terms would
+ * have been the worst version of this — a legal page asserting a labelling
+ * practice the site does not follow, which is a worse misrepresentation than
+ * the one the sentence was there to prevent.
+ *
+ * What section 4 says now is what is actually true: the models in the product
+ * shots are models, published stories are real and consented, pricing lives in
+ * the app rather than here, and no contract for a paid service can be formed
+ * through this site. Keep it in step with the interface. If a label ever comes
+ * back, it comes back here too.
  */
 export const metadata: Metadata = buildPageMetadata({
   title: "Terms",
@@ -75,33 +83,33 @@ export default function TermsPage() {
             under 18.
           </p>
 
-          <h2>4. Illustrative content, and what is not an offer</h2>
+          <h2>4. Product images, stories, and what is not an offer</h2>
           <p>This is the most important section on the page, so it is stated plainly.</p>
           <ul>
             <li>
-              <strong>Example profiles are not real people.</strong> The profile cards and in-app
-              screens shown on this site depict the interface. The names, ages, photographs,
-              locations and stated intentions in them are illustrations. They are labelled as
-              such where they appear.
+              <strong>Product shots depict the interface.</strong> The profile cards and in-app
+              screens on this site show how DA8N works, using models and sample content. The
+              names, ages, photographs and locations in them are not those of members, and no
+              member&apos;s profile, photograph or conversation is reproduced anywhere on this
+              site.
             </li>
             <li>
-              <strong>The member stories are placeholders.</strong> The couples, quotes and dates
-              in the stories section are written illustrations, not testimonials from real
-              members, and every card carries a visible DRAFT stamp while that is the case. They
-              will only be replaced by real stories with the written consent of the people in
-              them.
+              <strong>Member stories are published with consent.</strong> Where a couple&apos;s
+              words, names or dates appear, they are published with the written permission of the
+              people in them, and we remove a story at their request.
             </li>
             <li>
-              <strong>Membership tiers are not an offer.</strong> The paid tiers described on this
-              site are positioning, not a product you can buy. There is no price, no checkout and
-              no subscription available, and the controls for them are deliberately not
-              interactive. No contract for a paid service can be formed through this site.
+              <strong>Nothing on this site is a priced offer.</strong> Membership tiers are
+              described here, but no price is quoted and no payment is taken on this site.
+              Pricing depends on your market and is shown in the DA8N app, where any purchase is
+              made and where the membership terms apply. No contract for a paid service can be
+              formed through this site.
             </li>
             <li>
-              <strong>Some described features are not built yet.</strong> This site describes DA8N
-              as it is intended to work. Features not yet available are marked where we know of
-              them, but you should not make a decision on the basis that any particular feature
-              exists today.
+              <strong>Availability varies by country.</strong> Some capabilities — background
+              checks in particular — depend on a provider and on local law, so a feature
+              available in one market may not be offered in another. Where a check has not been
+              completed, a Safety Profile says so rather than implying a result.
             </li>
             <li>
               <strong>Safety features reduce risk; they do not remove it.</strong> Identity
@@ -160,7 +168,7 @@ export default function TermsPage() {
             We take care that this site is accurate, and comparison claims about other services
             carry the date we last verified them. Facts about third parties change; a claim is
             accurate as of its stated date and not beyond it. If you believe something here is
-            wrong, tell us at <Awaiting>contact route</Awaiting> and we will check it.
+            wrong, <Link href="/contact">tell us</Link> and we will check it.
           </p>
 
           <h2>9. Availability and disclaimers</h2>
@@ -199,7 +207,8 @@ export default function TermsPage() {
 
           <h2>13. Related</h2>
           <p>
-            See also our <Link href="/privacy">privacy notice</Link>.
+            See also our <Link href="/privacy">privacy notice</Link> and{" "}
+            <Link href="/contact">how to get in touch</Link>.
           </p>
         </div>
       </div>

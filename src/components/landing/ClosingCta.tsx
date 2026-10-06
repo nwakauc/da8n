@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { OUTRO } from "@/content/landing";
-import { JOIN_URL } from "@/lib/app-links";
+import { OUTRO, STORE_BADGES } from "@/content/landing";
+import { androidStoreUrl, JOIN_URL } from "@/lib/app-links";
 
 /**
  * Closing CTA — full-bleed photograph with the final headline over it.
@@ -33,6 +33,28 @@ export function ClosingCta() {
             {OUTRO.cta}
           </a>
           <span>{OUTRO.note}</span>
+        </div>
+
+        {/*
+          Store badges. Android is a real link to a real listing — the Date9ja
+          app, which is the member application this whole site hands people to;
+          see `STORE_BADGES`. iOS has no listing, so it is a span, and
+          "COMING SOON" says why rather than leaving a visitor to discover it.
+        */}
+        <div className="badges">
+          <a
+            href={androidStoreUrl()}
+            className="badge badge--live"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>{STORE_BADGES.android.kicker}</span>
+            <b>{STORE_BADGES.android.name}</b>
+          </a>
+          <span className="badge badge--soon">
+            <span>{STORE_BADGES.ios.kicker}</span>
+            <b>{STORE_BADGES.ios.name}</b>
+          </span>
         </div>
       </div>
     </section>

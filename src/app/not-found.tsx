@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NOINDEX_METADATA } from "@/lib/seo";
 import { publicMarkets } from "@/content/markets";
-import { marketPath } from "@/lib/routing";
+import { MarketChip } from "@/components/MarketChip";
 import { JOIN_CTA } from "@/content/route-copy";
 import { JOIN_URL } from "@/lib/app-links";
 
@@ -48,10 +48,7 @@ export default function NotFound() {
           <ul className="chipgrid">
             {markets.map((market) => (
               <li key={market.countryCode}>
-                <Link href={marketPath(market.countryCode)} className="chip-link">
-                  <b>{market.countryName}</b>
-                  <span>{market.countryCode.toUpperCase()}</span>
-                </Link>
+                <MarketChip market={market} />
               </li>
             ))}
           </ul>

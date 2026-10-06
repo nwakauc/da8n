@@ -188,9 +188,10 @@ export default function PrivacyPage() {
             to the membership app, because that is where the data is.
           </p>
           <p>
-            To exercise a right, or to ask a question about this notice, contact{" "}
-            <Awaiting>privacy contact route</Awaiting>. Our data protection representative is{" "}
-            <Awaiting>DPO or representative, where required</Awaiting>.
+            To exercise a right, or to ask a question about this notice, see{" "}
+            <Link href="/contact">how to get in touch</Link> — it names where each kind of request
+            goes, and says plainly which route is not yet published. Our data protection
+            representative is <Awaiting>DPO or representative, where required</Awaiting>.
           </p>
           <p>
             You also have the right to complain to a supervisory authority: the ICO in the United
