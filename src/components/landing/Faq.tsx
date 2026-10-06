@@ -64,8 +64,8 @@ export function Faq() {
           an order that does not match the DOM, and a keyboard user tabbing
           through a disclosure list would jump around the page.
         */}
-        {[FAQS.slice(0, 5), FAQS.slice(5)].map((column) => (
-          <div key={column[0].question} className="faq__col">
+        {[FAQS.slice(0, 5), FAQS.slice(5)].map((column, position) => (
+          <div key={position} className="faq__col">
             {column.map((faq) => (
               <details key={faq.question} className="faq__item">
                 <summary className="faq__q">

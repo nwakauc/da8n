@@ -246,6 +246,17 @@
   gap: 12px;
   margin-bottom: 28px;
 }
+/*
+ * Hidden exactly where the header shows its own "Log in" (`.nav-login` in
+ * chrome.css, 560px). The two breakpoints are a pair: if one moves the other
+ * has to move with it, or a returning member either sees the action twice or
+ * not at all.
+ */
+@media (min-width: 560px) {
+  .hero__login {
+    display: none;
+  }
+}
 .hero__trust {
   display: flex;
   flex-wrap: wrap;
@@ -696,7 +707,15 @@
   display: flex;
   flex-direction: column;
 }
+/*
+ * `text-wrap: wrap` undoes the global `balance` on h1-h3 in `globals.css`.
+ * The design balances every section heading EXCEPT this one and the cities
+ * title, and the exception is deliberate on a two-part headline: balancing
+ * "Tell us what you want. We'll take it from there." splits it mid-sentence
+ * across three ragged lines instead of giving each sentence a line of its own.
+ */
 .how__title {
+  text-wrap: wrap;
   margin: 0 0 clamp(28px, 3vw, 40px);
   font-weight: 800;
   font-size: clamp(30px, 4.4vw, 56px);
@@ -1158,7 +1177,9 @@
   flex: none;
   margin-bottom: 2px;
 }
+/* Unbalanced, as the design has it — see the note on `.how__title`. */
 .cities__title {
+  text-wrap: wrap;
   margin: 0;
   font-weight: 800;
   font-size: clamp(36px, 5vw, 64px);

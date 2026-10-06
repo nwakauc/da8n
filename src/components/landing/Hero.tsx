@@ -3,7 +3,7 @@ import { PoweredByD8n } from "../PoweredByD8n";
 import { RealMeBadge } from "../RealMeBadge";
 import { RealMeSeal } from "../icons";
 import { EXAMPLE_PROFILES, HERO } from "@/content/landing";
-import { JOIN_URL } from "@/lib/app-links";
+import { JOIN_URL, SIGN_IN_URL } from "@/lib/app-links";
 
 /**
  * Hero.
@@ -57,6 +57,20 @@ export function Hero() {
               {HERO.cta}
               {/* Decorative. `.btn` already reserves the gap for it. */}
               <span aria-hidden="true">→</span>
+            </a>
+            {/*
+              Log in, below 560px only. The header's own "Log in" is hidden at
+              that width — it is in the burger sheet, two taps behind an
+              unlabelled icon — so on a phone the whole first screen offers a
+              returning member nothing but "join", which is the one thing they
+              have already done. Above 560px the header shows it and this is
+              hidden, so the action is never offered twice at once.
+
+              `.btn--ghost` rather than a second filled button: it must read as
+              the lesser of the two, since most people arriving here are new.
+            */}
+            <a href={SIGN_IN_URL()} className="btn btn--ghost hero__login">
+              Log in
             </a>
           </div>
 
