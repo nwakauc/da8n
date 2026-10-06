@@ -3,14 +3,15 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import {
   ALL_CITIES_FACES,
-  CHAT_WARNING,
   CHECK_IN,
   CITIES_SECTION,
   COMPAT,
   FAQS,
   FAQ_SECTION,
-  FEATURED_STORY,
+  FEATURED_JOURNEY,
   FOOTER_COLUMNS,
+  JOURNEYS,
+  JOURNEYS_SECTION,
   GUIDES_CARD,
   LANDING_CITIES,
   MEMBERSHIP,
@@ -20,9 +21,8 @@ import {
   SAFETY,
   SAFETY_CARDS,
   SAFETY_PROFILE,
+  PROFILE_CHECK,
   STEPS,
-  STORIES,
-  STORIES_SECTION,
   TIERS,
   WHY,
 } from "./landing";
@@ -67,11 +67,10 @@ function allCopy(): string[] {
     ...PILLARS.flatMap((pillar) => [pillar.kicker, pillar.title, pillar.body]),
     ...STEPS.flatMap((step) => [step.label, step.detail]),
     ...LANDING_CITIES.flatMap((city) => [city.label, city.countryLabel]),
-    ...STORIES.flatMap((story) => [story.quote, story.who, ...story.chips]),
-    FEATURED_STORY.quote,
-    FEATURED_STORY.who,
-    FEATURED_STORY.route,
-    ...FEATURED_STORY.milestones.flatMap((milestone) => [milestone.label, milestone.value]),
+    ...JOURNEYS.flatMap((journey) => [journey.headline, ...journey.chips]),
+    FEATURED_JOURNEY.headline,
+    FEATURED_JOURNEY.route,
+    ...FEATURED_JOURNEY.facts.flatMap((fact) => [fact.label, fact.value]),
     ...COMPAT.reasons,
     COMPAT.partial.text,
     COMPAT.partial.verdict,
@@ -122,7 +121,7 @@ describe("landing city links", () => {
      */
     expect(LANDING_CITIES.map((entry) => entry.label)).toEqual([
       "London",
-      "Texas",
+      "Houston",
       "Toronto",
       "Sydney",
       "Dubai",
@@ -199,15 +198,16 @@ function safetyCopy(): string[] {
     SAFETY_PROFILE.backgroundCheck.cta,
     ...SAFETY_PROFILE.groups.flatMap((group) => [
       group.label,
-      ...group.items.map((item) => item.text),
+      ...group.items.flatMap((item) => [item.text, item.badge ?? ""]),
     ]),
     ...SAFETY_PROFILE.trust.items.map((item) => item.text),
     ...SAFETY_CARDS.flatMap((card) => [card.kicker, card.title, card.body, card.cta]),
-    CHAT_WARNING.label,
-    CHAT_WARNING.flag,
-    CHAT_WARNING.message,
-    CHAT_WARNING.verdictLead,
-    CHAT_WARNING.verdictRest,
+    PROFILE_CHECK.label,
+    PROFILE_CHECK.flag,
+    PROFILE_CHECK.body,
+    PROFILE_CHECK.line,
+    PROFILE_CHECK.lineAccent,
+    ...PROFILE_CHECK.tiles.map((tile) => tile.verdict),
     CHECK_IN.label,
     CHECK_IN.live,
     CHECK_IN.plan,
@@ -252,20 +252,43 @@ describe("safety copy", () => {
   });
 
   /*
-   * v4 stopped advertising background checks as a safety feature. v3 listed them
-   * as one of six, which is why the old version of this test required the words
-   * "consent-based" in that copy — a promised capability needs its qualifier.
+   * BACKGROUND CHECKS MAY ONLY BE OFFERED WITH THEIR QUALIFIER.
    *
-   * The qualifier is not needed any more because the promise is gone: the only
-   * place background checks now appear is a "Not completed" row on the example
-   * Safety Profile, which states a fact about a record rather than offering
-   * anything. This test holds that line. If background checks are ever sold as a
-   * feature again, the consent qualifier has to come back with them.
+   * Coverage is country-by-country and provider-bound, and a check cannot be
+   * run on someone who has not agreed to it — so an unqualified offer ("background
+   * checks included", which is what v3's VIP tier said) is a promise this product
+   * cannot keep in every market it sells in. v4 sells them as "Consent-based
+   * background checks", which names the one thing that is universally true.
+   *
+   * The safety section offers nothing: it shows a "Not completed" status row on
+   * the example Safety Profile, which states a fact about a record. Both halves
+   * are asserted here, because the failure mode is someone dropping the
+   * qualifier from the tier while the safety copy stays correct.
    */
-  it("offers no background-check capability, only an uncompleted status", () => {
+  it("offers background checks only with the consent qualifier", () => {
     expect(SAFETY_PROFILE.backgroundCheck.status).toBe("Not completed");
     for (const card of SAFETY_CARDS) {
       expect(/background check/i.test(`${card.title} ${card.body}`)).toBe(false);
+    }
+    for (const feature of TIERS.flatMap((tier) => tier.features)) {
+      if (!/background check/i.test(feature)) continue;
+      expect(feature, `"${feature}" offers background checks unqualified`).toMatch(/consent/i);
+    }
+  });
+
+  /*
+   * The other claim v4 rewrote. "Verified, financially stable members" promised
+   * financial screening: a different category from identity verification, needing
+   * a provider that can do it, a lawful basis per market and a published
+   * definition — and it read as a wealth filter, which carries discrimination
+   * exposure in several of the listed markets. Nothing on this page may promise
+   * it again without those four things existing first.
+   */
+  it("promises no financial screening in any tier", () => {
+    for (const feature of TIERS.flatMap((tier) => tier.features)) {
+      expect(/\b(financial|financially|income|wealth|net worth|solvent)\b/i.test(feature)).toBe(
+        false,
+      );
     }
   });
 
@@ -284,29 +307,52 @@ describe("safety copy", () => {
   });
 });
 
-describe("stories", () => {
-  it("has a quote and an attribution for every card", () => {
-    for (const story of [...STORIES, FEATURED_STORY]) {
-      expect(story.quote.length).toBeGreaterThan(20);
-      expect(story.who.length).toBeGreaterThan(0);
+describe("journeys", () => {
+  it("gives every card a headline and two chips", () => {
+    for (const journey of JOURNEYS) {
+      expect(journey.headline.length).toBeGreaterThan(20);
+      expect(journey.chips).toHaveLength(2);
     }
+    expect(FEATURED_JOURNEY.headline.length).toBeGreaterThan(20);
   });
 
-  it("gives the featured story its three milestones", () => {
-    expect(FEATURED_STORY.milestones).toHaveLength(3);
+  it("gives the featured journey its three facts", () => {
+    expect(FEATURED_JOURNEY.facts).toHaveLength(3);
   });
 
   /*
-   * These are testimonials about named people on a page with no DRAFT stamp,
-   * which is the owner's decision and the right one for live marketing. What
-   * must not creep back in is a CLAIM about outcomes at scale — "thousands of
-   * couples", "most members marry within a year". One couple saying what
-   * happened to them is a story; a number is a statistic, and a statistic
-   * needs a dated source and its own decision.
+   * THE REASON THIS SECTION HAS NO NAMES. Through v3 these were testimonials:
+   * a quotation attributed to a named couple, with dates. An endorsement
+   * attributed to an identifiable person needs that person's written consent
+   * on file, and it never existed — the FTC endorsement rules and the UK CAP
+   * code both treat an unconsented or invented testimonial as a misleading
+   * claim, so the page was shipping a content debt no code change could pay.
+   *
+   * v4 removed the attribution. This test keeps it removed: a quotation mark
+   * or an "X & Y" byline here means someone has reintroduced a testimonial,
+   * and it needs the consent before it can ship.
    */
-  it("states no outcome statistic in any story", () => {
-    for (const story of [...STORIES, FEATURED_STORY]) {
-      const text = [story.quote, story.who].join(" ");
+  it("attributes nothing to a named person", () => {
+    for (const text of [...JOURNEYS.map((j) => j.headline), FEATURED_JOURNEY.headline]) {
+      expect(/[“”"]/.test(text), `"${text}" reads as a quotation`).toBe(false);
+      expect(/\b[A-Z][a-z]+\s*&\s*[A-Z][a-z]+\b/.test(text), `"${text}" names a couple`).toBe(
+        false,
+      );
+    }
+  });
+
+  /*
+   * What must never creep back in either way is a CLAIM about outcomes at
+   * scale — "thousands of couples", "most members marry within a year". A
+   * situation is a situation; a number is a statistic, and a statistic needs a
+   * dated source and its own decision.
+   */
+  it("states no outcome statistic", () => {
+    for (const text of [
+      ...JOURNEYS.map((j) => j.headline),
+      FEATURED_JOURNEY.headline,
+      ...FEATURED_JOURNEY.facts.map((f) => f.value),
+    ]) {
       expect(/\b\d[\d,.]*\s*(couples|marriages|members|users|weddings)\b/i.test(text)).toBe(false);
       expect(/\b(most|majority of|\d+%)\s+(members|couples|users)\b/i.test(text)).toBe(false);
     }
@@ -406,7 +452,7 @@ describe("section numbering", () => {
       COMPAT.num,
       CITIES_SECTION.num,
       SAFETY.num,
-      STORIES_SECTION.num,
+      JOURNEYS_SECTION.num,
       MEMBERSHIP.num,
       FAQ_SECTION.num,
     ];

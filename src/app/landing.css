@@ -360,10 +360,11 @@
 .dot--ring {
   box-shadow: 0 0 0 3px rgba(13, 122, 67, 0.18);
 }
-/* The warning dot on the in-chat fraud card. Paired with the word "Money
-   request" beside it — colour is never the only carrier of the state. */
-.dot--rose {
-  background: var(--da8n-rose);
+/* The status dot on the profile-review card. Paired with the words "Every
+   profile reviewed" beside it — colour is never the only carrier of the
+   state. */
+.dot--gold {
+  background: var(--da8n-gold);
 }
 .pcard__cap {
   position: relative;
@@ -947,6 +948,16 @@
   background: #fff;
   border: 1px solid var(--da8n-line-warm);
   color: var(--da8n-ink-soft);
+}
+/*
+ * The selected state on the "Open to dating" row. Rose outline on blush rather
+ * than the solid ink of `.chip`, because these sit directly under the ink
+ * "open to meeting people from" chips and two solid rows read as one list.
+ */
+.chip--rose {
+  background: #fff0f2;
+  border: 1px solid var(--da8n-rose);
+  color: var(--da8n-ink);
 }
 .phone__hero {
   position: relative;
@@ -1554,6 +1565,12 @@
  * the point: these are the safety counterpart of the four reasons at the top of
  * the page, and the page should say so visually.
  */
+/*
+ * One column, then three at 860 — the design's own breakpoint, and it never
+ * shows two. Three cards in a two-column grid strands the third on a row of
+ * its own, which reads as "and one more thing" rather than as the three equal
+ * capabilities the section is arguing for.
+ */
 .scards {
   list-style: none;
   margin: 0;
@@ -1562,12 +1579,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(18px, 2.2vw, 24px);
 }
-@media (min-width: 640px) {
-  .scards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (min-width: 1000px) {
+@media (min-width: 860px) {
   .scards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1702,6 +1714,21 @@
   font: 600 14.5px var(--font-manrope), sans-serif;
   color: var(--da8n-ink);
 }
+/*
+ * The qualifier pill at the end of a Safety Profile row — one of them, "Not
+ * AI" on the liveness row. `margin-left:auto` rather than a grid column, so a
+ * row without a badge keeps its natural width.
+ */
+.sbadge {
+  margin-left: auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fbf0d6;
+  color: var(--da8n-gold-text);
+  font: 800 11px var(--font-manrope), sans-serif;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
 .sgroup li.plain {
   display: block;
   padding: 7px 0 7px 28px;
@@ -1789,9 +1816,9 @@
   box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.18);
 }
 
-/* The in-chat fraud warning. Same card shell as `.checkin` beside it — both are
+/* Profile review. Same card shell as `.checkin` beside it — both are
    depictions of one screen, so they share a treatment. */
-.chatwarn {
+.pcheck {
   flex: 1;
   background: #fff;
   border: 1px solid var(--da8n-line-blush);
@@ -1803,77 +1830,74 @@
   gap: 14px;
   box-shadow: 0 30px 60px -36px rgba(163, 22, 74, 0.35);
 }
-.chatwarn__top {
+.pcheck__top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
 }
-.chatwarn__label {
+.pcheck__label {
   font: 800 12px var(--font-manrope), sans-serif;
   letter-spacing: 0.12em;
-  color: var(--da8n-rose-ink);
+  color: var(--da8n-gold-ink);
 }
-.chatwarn__flag {
+.pcheck__flag {
   display: flex;
   align-items: center;
   gap: 6px;
   font: 700 12.5px var(--font-manrope), sans-serif;
-  color: #b0173d;
-}
-.chatwarn__msg {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.chatwarn__avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #e9dfd2;
-  display: grid;
-  place-items: center;
-  font: 800 16px var(--font-bricolage), sans-serif;
   color: var(--da8n-muted);
-  flex: none;
 }
-.chatwarn__bubble {
-  padding: 12px 14px;
-  border-radius: 16px 16px 16px 4px;
-  background: var(--da8n-cream);
-  font: 600 13.5px/1.5 var(--font-manrope), sans-serif;
-  color: var(--da8n-ink-soft);
-}
-.chatwarn__verdict {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: #fff0f2;
-  border: 1px solid #ffc9d3;
-  font: 600 13.5px/1.5 var(--font-manrope), sans-serif;
-  color: #4d4239;
-}
-.chatwarn__verdict b {
-  color: #b0173d;
-}
-.chatwarn__acts {
+.pcheck__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
-.chatwarn__acts span {
-  text-align: center;
-  padding: 12px;
+.pcheck__tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #2f261f;
+}
+/* The blocked tile is desaturated as well as labelled. The label is the
+   carrier; the filter only keeps the eye from reading three equal passes. */
+.pcheck__tile--blocked {
+  filter: saturate(0.75);
+}
+.pcheck__verdict {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
   border-radius: 999px;
-  font: 800 14px var(--font-manrope), sans-serif;
-}
-.chatwarn__acts span:first-child {
-  background: var(--da8n-ink);
+  background: var(--da8n-green);
   color: #fff;
+  font: 800 11px var(--font-manrope), sans-serif;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
-.chatwarn__acts span + span {
-  border: 1.5px solid var(--da8n-ink);
+.pcheck__tile--blocked .pcheck__verdict {
+  background: var(--da8n-ink);
+  color: #f6c453;
+}
+.pcheck__body {
+  margin: 0;
+  font: 700 15px/1.45 var(--font-manrope), sans-serif;
   color: var(--da8n-ink);
+  text-wrap: pretty;
+}
+.pcheck__line {
+  margin: 0;
+  font: 800 clamp(18px, 1.8vw, 21px) / 1.25 var(--font-bricolage), sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--da8n-ink);
+  text-wrap: balance;
 }
 
 .checkin {
@@ -1996,17 +2020,18 @@
   }
 }
 
-/* ---------------------------------------------------------------- stories */
+/* --------------------------------------------------------------- journeys */
 
-.stories {
+.journeys {
   background: var(--da8n-cream);
   border-top: 1px solid var(--da8n-line);
 }
-.stories .sec__in {
+.journeys .sec__in {
   --pad-y: clamp(72px, 9vw, 128px);
 }
 /*
- * The featured story. One photograph, one quote, three dated milestones.
+ * The featured journey. One photograph, a route chip, a headline and three
+ * labelled facts.
  *
  * `min-height` on the media rather than an aspect-ratio: this is a side-by-side
  * panel whose height is set by the copy next to it, so a ratio would either
@@ -2044,23 +2069,17 @@
   gap: 28px;
   justify-content: center;
 }
-.feat__body blockquote {
-  margin: 0;
-  font: 700 clamp(24px, 2.6vw, 34px) / 1.22 var(--font-bricolage), sans-serif;
-  letter-spacing: -0.015em;
-  text-wrap: pretty;
-}
-.feat__who {
+.feat__lead {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 14px;
 }
-.feat__who b {
-  font: 800 17px var(--font-manrope), sans-serif;
-}
-.feat__who > span {
-  font: 700 14.5px var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
+.feat__lead h3 {
+  margin: 0;
+  font: 700 clamp(24px, 2.6vw, 34px) / 1.18 var(--font-bricolage), sans-serif;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
 .feat__steps {
@@ -2088,21 +2107,21 @@
 }
 
 /*
- * The two remaining stories, side by side rather than in a scrolling rail. The
- * card is horizontal — photo left, quote right — which is what lets both fit on
- * one screen at desktop and still carry a readable quote.
+ * The two remaining journeys, side by side rather than in a scrolling rail. The
+ * card is horizontal — photo left, headline right — which is what lets both fit
+ * on one screen at desktop and still carry a readable line.
  */
-.stories__grid {
+.journeys__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(18px, 2.4vw, 28px);
 }
 @media (min-width: 1100px) {
-  .stories__grid {
+  .journeys__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-.story {
+.journey {
   margin: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -2112,57 +2131,53 @@
   overflow: hidden;
 }
 @media (min-width: 560px) {
-  .story {
+  .journey {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   }
 }
 @media (min-width: 1100px) {
-  .story {
+  .journey {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   }
 }
-.story__media {
+.journey__media {
   position: relative;
   min-height: 240px;
   background: #2f261f;
 }
 @media (min-width: 560px) {
-  .story__media {
+  .journey__media {
     min-height: 280px;
   }
 }
-.story figcaption {
+.journey figcaption {
   padding: clamp(20px, 2.6vw, 28px);
   display: flex;
   flex-direction: column;
   gap: 16px;
   justify-content: space-between;
 }
-.story blockquote {
+/* h3 inside the landing section, h2 on `/stories` where the card is the only
+   heading level below the page title. Same card either way. */
+.journey figcaption :is(h2, h3) {
   margin: 0;
-  font: 600 clamp(17px, 1.6vw, 19px) / 1.45 var(--font-bricolage), sans-serif;
+  font: 700 clamp(19px, 1.8vw, 22px) / 1.3 var(--font-bricolage), sans-serif;
   text-wrap: pretty;
 }
-.story__who {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.story__who b {
-  font: 800 15px var(--font-manrope), sans-serif;
-}
-.story__chips {
+.journey__chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.story__chips .chip {
+.journey__chips .chip,
+.feat__lead .chip {
   padding: 5px 11px;
   background: var(--da8n-cream);
   border: 1px solid #e8ddcc;
   color: var(--da8n-ink);
 }
-.story__chips .chip--ink {
+.journey__chips .chip--ink,
+.feat__lead .chip--ink {
   background: var(--da8n-ink);
   border-color: var(--da8n-ink);
   color: #fff;
@@ -2338,16 +2353,35 @@
   background: var(--da8n-cream);
   border-top: 1px solid var(--da8n-line);
 }
+/*
+ * THREE COLUMNS, not two, and the third is the whole layout.
+ *
+ * The design splits the nine questions across two equal columns beside the
+ * intro, at the same width as it: `repeat(3, minmax(0, 1fr))`. Running all nine
+ * down one column — which is what this was — makes the FAQ twice as tall as the
+ * column beside it, so the guides card floats in an acre of cream and the
+ * section is the longest on the page for the least important content on it.
+ *
+ * The breakpoints are the design's own: three columns at 1180, two at 760, one
+ * below. At two columns the intro sits above a single run of questions, which
+ * is why `.faq__col` carries no order — source order is reading order at every
+ * width.
+ */
 .faq .sec__in {
   --pad-y: clamp(72px, 9vw, 120px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: clamp(32px, 5vw, 80px);
-  align-items: start;
+  gap: clamp(18px, 2.4vw, 28px);
+  align-items: stretch;
 }
-@media (min-width: 960px) {
+@media (min-width: 760px) {
   .faq .sec__in {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1180px) {
+  .faq .sec__in {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 .faq__intro {
@@ -2355,29 +2389,34 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  position: static;
-  top: 32px;
 }
-@media (min-width: 960px) {
+/* Sticky only at three columns. At two the intro is a header above the
+   questions, and a sticky header would follow them down the page. */
+@media (min-width: 1180px) {
   .faq__intro {
     position: sticky;
+    top: 32px;
   }
 }
 .faq__intro h2 {
   margin: 0;
   font-weight: 800;
-  font-size: clamp(34px, 4.6vw, 58px);
+  font-size: clamp(30px, 2.9vw, 46px);
   line-height: 1.04;
   letter-spacing: -0.035em;
+  white-space: nowrap;
 }
-.faq__intro p {
-  margin: 0;
-  font: 500 17px/1.6 var(--font-manrope), sans-serif;
-  color: var(--da8n-muted);
-  max-width: 22em;
-}
-.faq__list {
-  display: grid;
+
+/*
+ * One column of questions. `space-between` plus `flex: 1` on each card is what
+ * makes the two question columns and the guides card all finish level: the
+ * cards share the column's height rather than stacking to their own.
+ */
+.faq__col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   gap: 12px;
 }
 .faq__item {
@@ -2385,6 +2424,10 @@
   border: 1px solid var(--da8n-line);
   border-radius: 18px;
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .faq__q {
   list-style: none;
@@ -2396,6 +2439,7 @@
   cursor: pointer;
   font: 700 clamp(17px, 2vw, 19px) var(--font-bricolage), sans-serif;
   min-height: 64px;
+  box-sizing: border-box;
 }
 .faq__q::-webkit-details-marker {
   display: none;
@@ -2479,8 +2523,11 @@
  * `/guides`, with their titles read from `content/guides.ts` by slug so the
  * card can never advertise an article that does not exist.
  */
+/* `flex: 1` and `space-between`: the card grows to the bottom of the intro
+   column so it finishes level with the two question columns beside it. */
 .guides {
-  margin-top: 20px;
+  margin-top: 8px;
+  flex: 1;
   background: #fff;
   border: 2px solid var(--da8n-ink);
   border-radius: 22px;
@@ -2488,6 +2535,7 @@
   padding: 22px 24px 14px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 .guides__kicker {
   font: 800 12px var(--font-manrope), sans-serif;

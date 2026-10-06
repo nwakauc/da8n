@@ -198,7 +198,7 @@ export const PILLARS: readonly Pillar[] = [
     kicker: "OPEN TO",
     title: "Date who you want, how you want.",
     body:
-      "Where you live, where you’re from and where you’d meet someone. Home, abroad or both.",
+      "Choose the race, ethnicity, cities and regions you’re open to. Only people who fit your choices appear for you.",
     accent: "ink",
     icon: "globe",
   },
@@ -245,14 +245,15 @@ export const STEPS: readonly Step[] = [
   {
     num: "02",
     label: "Set your intentions",
-    detail: "Dating, love, a relationship or marriage, and the cities you’re open to.",
+    detail:
+      "Dating, love, a relationship or marriage. Then the cities, regions and backgrounds you’re open to.",
     accent: "rose",
   },
   {
     num: "03",
     label: "Get RealMe verified",
     detail:
-      "ID and a live selfie. About four minutes, and nobody can message you until it’s done.",
+      "RealMe verifies you’re a real person and helps confirm you are who you say you are. About four minutes.",
     accent: "gold",
   },
   {
@@ -293,9 +294,11 @@ export type LandingCity = {
   readonly slug: string;
   readonly countryCode: string;
   /**
-   * What the card says. Usually the city's own name — but the design labels
-   * the Houston card "Texas", and a state is a broader intent than a city.
-   * Kept as designed; see the open question in the README.
+   * What the card says. Currently always the city's own name — v4 settled the
+   * one place it did not: v3 labelled the Houston card "Texas", which named a
+   * state in a grid of cities. The field stays because the design's label and
+   * the catalog's entity are separate things, and the next market may need the
+   * distinction back.
    */
   readonly label: string;
   readonly countryLabel: string;
@@ -306,7 +309,7 @@ export type LandingCity = {
 
 export const CITIES_SECTION = {
   num: "04",
-  eyebrow: "CITIES",
+  eyebrow: "DA8N CITIES",
   title: "Your city. ",
   titleAccent: "Or theirs.",
   lede: "Meet someone around the corner, back home, or somewhere you plan to be.",
@@ -335,7 +338,7 @@ export const PLACES_EXAMPLE = {
 } as const;
 
 /**
- * The design's grid, exactly: London, Texas, Toronto, Sydney, Dubai, Paris,
+ * The design's grid, exactly: London, Houston, Toronto, Sydney, Dubai, Paris,
  * Cape Town. Seven cards plus the "all cities" tile is eight, which fills two
  * clean rows of four at desktop — owner's call, 2026-10-04, and the reason
  * the list is capped here rather than grown.
@@ -366,7 +369,7 @@ export const LANDING_CITIES: readonly LandingCity[] = [
   {
     slug: "houston",
     countryCode: "us",
-    label: "Texas",
+    label: "Houston",
     countryLabel: "UNITED STATES",
     flag: "🇺🇸",
     photo: "/images/cities/houston.webp",
@@ -475,8 +478,43 @@ export const SAFETY = {
 
 export type SafetyGroup = {
   readonly label: string;
-  readonly items: readonly { readonly text: string; readonly state: "verified" | "pending" | "plain" }[];
+  readonly items: readonly {
+    readonly text: string;
+    readonly state: "verified" | "pending" | "plain";
+    /**
+     * An optional qualifier pill at the end of the row. v4 adds exactly one,
+     * "Not AI" on the liveness row, because that is the distinction a liveness
+     * check actually establishes and the one a reader will otherwise assume
+     * "Live person verified" does not cover.
+     */
+    readonly badge?: string;
+  }[];
 };
+
+/*
+ * Declared separately and annotated rather than inferred: the `as const` on
+ * SAFETY_PROFILE below would otherwise narrow each row to its own literal
+ * shape, and a row written without `badge` would not have the property at all
+ * — so the one row that does have it could not be read generically.
+ */
+const SAFETY_PROFILE_GROUPS: readonly SafetyGroup[] = [
+  {
+    label: "IDENTITY",
+    items: [
+      { text: "RealMe verified", state: "verified" },
+      { text: "Live person verified", state: "verified", badge: "Not AI" },
+      { text: "Age verified", state: "verified" },
+    ],
+  },
+  {
+    label: "ACCOUNT AND PROFILE",
+    items: [
+      { text: "Account in good standing", state: "verified" },
+      { text: "Profile integrity checks complete", state: "verified" },
+      { text: "Member since March 2025", state: "plain" },
+    ],
+  },
+];
 
 /**
  * The example Safety Profile. Note what it deliberately does NOT show, and
@@ -489,24 +527,7 @@ export type SafetyGroup = {
 export const SAFETY_PROFILE = {
   owner: "Marcus",
   protectedBy: "Protected by D8N",
-  groups: [
-    {
-      label: "IDENTITY",
-      items: [
-        { text: "RealMe verified", state: "verified" },
-        { text: "Live person verified", state: "verified" },
-        { text: "Age verified", state: "verified" },
-      ],
-    },
-    {
-      label: "ACCOUNT AND PROFILE",
-      items: [
-        { text: "Account in good standing", state: "verified" },
-        { text: "Profile integrity checks complete", state: "verified" },
-        { text: "Member since March 2025", state: "plain" },
-      ],
-    },
-  ] satisfies readonly SafetyGroup[],
+  groups: SAFETY_PROFILE_GROUPS,
   trust: {
     label: "Trust Score",
     band: "Strong",
@@ -558,7 +579,7 @@ export const SAFETY_CARDS: readonly SafetyCard[] = [
     kicker: "IDENTITY",
     title: "RealMe identity verification",
     body:
-      "A liveness selfie, verification video and government ID work together, so the person you’re talking to is the person in the photos.",
+      "A liveness selfie, verification video and government ID work together to help confirm you’re a real person, not an AI-generated identity, and that you’re the person shown in your photos.",
     cta: "How verification works",
     href: "/realme",
     accent: "gold",
@@ -587,23 +608,38 @@ export const SAFETY_CARDS: readonly SafetyCard[] = [
 ];
 
 /**
- * The in-chat fraud warning mockup.
+ * The profile-review mockup, which is what v4 puts where v3 had the in-chat
+ * money-request warning.
  *
- * It depicts the product flagging a message, which is the one safety claim on
- * this page that is easiest to doubt and easiest to show. The quoted message is
- * written, not harvested: no real conversation, real member or real report is
- * reproduced anywhere on this page, and this is the file that says so.
+ * The swap is the point. The fraud claim already has a card of its own in
+ * `SAFETY_CARDS` and a guide behind it; what had no illustration was the claim
+ * the three cards all rest on — that a person's face is checked before anyone
+ * sees it. So the panel shows three profiles going through review: two pass,
+ * one is blocked as an impersonation.
+ *
+ * The blocked tile deliberately reuses a photo that appears elsewhere on this
+ * page as Maya's. That is not an asset mistake. An impersonation is someone
+ * else's real photograph, and a stock "fake-looking" face would have taught
+ * the opposite lesson.
+ *
+ * Nothing here is a real member, a real report or a real moderation decision.
  */
-export const CHAT_WARNING = {
-  label: "IN-CHAT WARNING",
-  flag: "Money request",
-  /** An initial, not a name. There is no member behind this card. */
-  sender: "J",
-  message: "My account is frozen. Could you cover $300 until Friday?",
-  verdictLead: "This looks like a common scam pattern.",
-  verdictRest: " Never send money to someone you haven’t met.",
-  report: "Report",
-  learn: "Learn more",
+export const PROFILE_CHECK = {
+  label: "PROFILE CHECK",
+  flag: "Every profile reviewed",
+  tiles: [
+    { photo: "/images/landing/real-person-1.jpeg", verdict: "Real person", blocked: false },
+    { photo: "/images/landing/real-person-2.jpeg", verdict: "Real person", blocked: false },
+    { photo: "/images/landing/maya-3.jpeg", verdict: "Impersonation · Blocked", blocked: true },
+  ],
+  body: "AI-generated profile images and impersonation attempts are detected and blocked.",
+  /*
+   * The handwritten-feeling line v3 carried under the hero card. v4 moves it
+   * here, where it lands as the consequence of the panel above it rather than
+   * as an unearned aside beside the first CTA.
+   */
+  line: "Be the real you. ",
+  lineAccent: "Your person wants the authentic you.",
 } as const;
 
 export const CHECK_IN = {
@@ -616,63 +652,73 @@ export const CHECK_IN = {
   out: "Get me out",
 } as const;
 
-/* ---------------------------------------------------------------- stories */
+/* --------------------------------------------------------------- journeys */
 
-export type Story = {
-  readonly quote: string;
-  readonly who: string;
+export type Journey = {
   /**
-   * The two chips under the name. The first is the route the couple met
-   * across, which is the thing this page is actually about; the second is where
-   * they got to. Replaces v3's single `meta` line.
+   * The headline. v4 writes these in the third person about a situation, not
+   * in the first person about a named couple — see the note on the section
+   * below for why that is the whole change.
+   */
+  readonly headline: string;
+  /**
+   * The two chips. The first is the route the pair met across, which is what
+   * this section is actually about; the second is the DA8N feature that made
+   * it possible.
    */
   readonly chips: readonly [string, string];
   readonly photo: string | null;
 };
 
-export const STORIES_SECTION = {
+export const JOURNEYS_SECTION = {
   num: "06",
-  eyebrow: "STORIES",
+  eyebrow: "JOURNEYS",
   title: "This is what ",
   titleAccent: "we're here for.",
 } as const;
 
 /**
- * One story gets the width, and it is the one with a timeline.
+ * JOURNEYS, and v4's rename is the smallest part of the change.
  *
- * v3 ran three equal cards in a scrolling rail, which gave a two-year
- * cross-border relationship the same 20 words as the other two. The featured
- * story carries three dated milestones instead — matched, first visit, married —
- * because the dates are the claim: this is what a distance match looks like
- * over time, not a quote.
+ * v3 and the first v4 import ran testimonials: a quotation, a couple's names
+ * ("Ana & Luca", "Grace & Daniel", "Leila & Sam") and dated milestones
+ * ("MARRIED — Lisbon, 2025"). Every one of those is an endorsement attributed
+ * to an identifiable person, which needs that person's written consent on file
+ * before it can ship — and the consent was never obtained, so the section was
+ * the one thing keeping an otherwise shippable page honest only by footnote.
  *
- * Consent note: this card states three dates about a named couple, which is
- * the strongest endorsement claim on the page. It needs the couple's written
- * consent on file before it ships — see CONTENT INTEGRITY at the top.
+ * v4 removes the attribution instead of chasing the paperwork. What is left
+ * says the same thing without putting words in anyone's mouth: a route, a
+ * situation, and the product mechanics that carried it. "Both said marriage"
+ * is a statement about how INTENTIONS works. "Toronto, with Date Check-in" is
+ * a statement about Date Check-in. Neither is a promise made on behalf of a
+ * member who cannot be reached to confirm it.
+ *
+ * If real, consented stories are ever collected, they belong in `/stories`
+ * with names and quotes. Do not reintroduce them here without the consent.
  */
-export const FEATURED_STORY = {
-  quote: "My mother’s first question was about his family. We had already talked it through.",
-  who: "Ana & Luca",
+export const FEATURED_JOURNEY = {
   route: "Lisbon ↔ Toronto",
+  headline: "Two cities. One honest conversation about where to build a life.",
   photo: "/images/landing/story-wedding.jpg",
-  milestones: [
-    { label: "MATCHED", value: "June 2024", accent: "rose" },
-    { label: "FIRST VISIT", value: "Toronto, Sept 2024", accent: "green" },
-    { label: "MARRIED", value: "Lisbon, 2025", accent: "gold" },
+  /** Three product facts, not three dates. See the note above. */
+  facts: [
+    { label: "INTENTIONS", value: "Both said marriage", accent: "rose" },
+    { label: "FOR YOU", value: "Introduced, with reasons", accent: "green" },
+    { label: "FIRST VISIT", value: "Toronto, with Date Check-in", accent: "gold" },
   ],
 } as const;
 
-export const STORIES: readonly Story[] = [
+export const JOURNEYS: readonly Journey[] = [
   {
-    quote:
-      "I had left every app. Here nobody could hide who they were, and that alone changed the conversations.",
-    who: "Grace & Daniel",
-    chips: ["Cape Town → London", "Married 2024"],
+    headline:
+      "For the woman who left every app because nobody was who they said they were.",
+    chips: ["Cape Town → London", "RealMe verified"],
     photo: "/images/landing/story-golden.jpg",
   },
   {
-    quote: "Two continents, one matchmaker. She asked the questions we were both avoiding.",
-    who: "Leila & Sam",
+    headline:
+      "Two continents, one matchmaker, asking the questions you’d both rather avoid.",
     chips: ["Lagos → Manchester", "VIP introduction"],
     photo: "/images/landing/halima-mark.jpeg",
   },
@@ -747,26 +793,29 @@ export const TIERS: readonly Tier[] = [
     badge: "MATCHMAKER",
     blurb: "More control, better standards.",
     /**
-     * TWO ITEMS HERE ARE THE ONLY CLAIMS ON THIS PAGE I CANNOT VERIFY FROM
-     * THE CODEBASE, and they are now on an indexable page. Flagged, not
-     * changed — the wording is the owner's call.
+     * v4 rewrote the two lines that were the only unverifiable claims on this
+     * page, and both rewrites are substantive rather than cosmetic.
      *
-     * "Verified, financially stable members" promises financial screening,
-     * which is a different category from identity verification: it needs a
-     * provider that can do it, a lawful basis in every market, and a published
-     * definition of "financially stable". It also reads as a wealth filter,
-     * which carries discrimination exposure in several of the listed markets.
+     * "Verified, financially stable members" → "Enhanced identity and
+     * eligibility checks". The old line promised financial screening: a
+     * different category from identity verification, needing a provider that
+     * can do it, a lawful basis per market and a published definition of
+     * "financially stable" — and it read as a wealth filter, which carries
+     * discrimination exposure in several of the listed markets. "Eligibility"
+     * is what the tier actually gates and is defensible as written.
      *
-     * "Background checks included" promises a capability per jurisdiction.
-     * Coverage is country-by-country and provider-bound, so "included" is hard
-     * to make true everywhere DA8N sells. `/safety#background-checks` states
-     * the consent and availability limits; keep the two consistent.
+     * "Background checks included" → "Consent-based background checks". The
+     * old line promised a capability in every jurisdiction; coverage is
+     * country-by-country and provider-bound, so "included" could not be true
+     * everywhere DA8N sells. The new line names the thing that IS universally
+     * true about them — they require the subject's consent — and matches the
+     * limits set out at `/safety#background-checks`. Keep the two consistent.
      */
     features: [
       "Everything in da8n+",
-      "Verified, financially stable members",
+      "Enhanced identity and eligibility checks",
       "More control over who sees you",
-      "Background checks included",
+      "Consent-based background checks",
       "A personal concierge, if you want one",
     ],
     cta: "Go VIP",
@@ -783,7 +832,6 @@ export const FAQ_SECTION = {
   num: "08",
   eyebrow: "QUESTIONS",
   title: "Still wondering?",
-  lede: "Short answers to what people ask before they join.",
 } as const;
 
 /**
@@ -864,7 +912,7 @@ export const FAQS: readonly Faq[] = [
 export const OUTRO = {
   title: "Your person is out there.",
   body: "Maybe closer than you think. Maybe a flight away.",
-  cta: "Start your story, free",
+  cta: "Join da8n for free",
   note: "Verified in about four minutes. Adults 18+.",
   photo: "/images/landing/hero-home.jpeg",
 } as const;

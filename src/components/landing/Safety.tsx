@@ -3,9 +3,9 @@ import { ImageSlot } from "../ImageSlot";
 import { Check, Flag, RealMeSeal, SealOutline, Shield } from "../icons";
 import { Eyebrow } from "./Eyebrow";
 import {
-  CHAT_WARNING,
   CHECK_IN,
   EXAMPLE_PROFILES,
+  PROFILE_CHECK,
   SAFETY,
   SAFETY_CARDS,
   SAFETY_PROFILE,
@@ -24,8 +24,8 @@ const CARD_GLYPH = {
 } as const;
 
 /**
- * Safety: three capability cards, the example Safety Profile, the in-chat fraud
- * warning and Date Check-in.
+ * Safety: three capability cards, the example Safety Profile, the profile-review
+ * panel and Date Check-in.
  *
  * WHAT THIS CARD MUST NEVER SHOW, and does not:
  *   identity documents or their images; report history; who filed a report;
@@ -117,6 +117,7 @@ export function Safety() {
                         </span>
                       ) : null}
                       {item.text}
+                      {item.badge ? <span className="sbadge">{item.badge}</span> : null}
                     </li>
                   ))}
                 </ul>
@@ -186,33 +187,50 @@ export function Safety() {
 
           <div className="safety__col">
             {/*
-              The fraud claim, shown rather than asserted. Nothing here is a
-              real message, member or report — see `CHAT_WARNING`. The Report
-              and Learn more pills are part of the depiction and carry no role:
-              they are what the member would see, not controls on this page.
+              Profile review, shown rather than asserted — v4 puts this where
+              v3 had the in-chat money-request mockup. Fraud already has a card
+              above with a guide behind it; what had no illustration was the
+              claim those cards rest on, that a face is checked before anyone
+              sees it.
+
+              The three tiles are decorative in the accessibility sense: the
+              paragraph below them states the claim in full, so the verdict
+              pills are `aria-hidden` rather than read out as a list of
+              fragments. Nothing here is a real member or a real decision.
             */}
-            <div className="chatwarn">
-              <div className="chatwarn__top">
-                <span className="chatwarn__label">{CHAT_WARNING.label}</span>
-                <span className="chatwarn__flag">
-                  <span className="dot dot--rose" />
-                  {CHAT_WARNING.flag}
+            <div className="pcheck">
+              <div className="pcheck__top">
+                <span className="pcheck__label">{PROFILE_CHECK.label}</span>
+                <span className="pcheck__flag">
+                  <span className="dot dot--gold" />
+                  {PROFILE_CHECK.flag}
                 </span>
               </div>
-              <div className="chatwarn__msg">
-                <span className="chatwarn__avatar" aria-hidden="true">
-                  {CHAT_WARNING.sender}
-                </span>
-                <div className="chatwarn__bubble">{CHAT_WARNING.message}</div>
+              <div className="pcheck__grid" aria-hidden="true">
+                {PROFILE_CHECK.tiles.map((tile) => (
+                  <div
+                    key={tile.photo}
+                    className={tile.blocked ? "pcheck__tile pcheck__tile--blocked" : "pcheck__tile"}
+                  >
+                    <ImageSlot
+                      src={tile.photo}
+                      alt=""
+                      placeholder="Profile photo"
+                      className="slot-fill"
+                      sizes="(min-width: 980px) 10vw, 28vw"
+                    />
+                    <span className="pcheck__verdict">
+                      {tile.blocked ? null : <span aria-hidden="true">✓ </span>}
+                      {tile.verdict}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <p className="chatwarn__verdict">
-                <b>{CHAT_WARNING.verdictLead}</b>
-                {CHAT_WARNING.verdictRest}
+              <p className="pcheck__body">{PROFILE_CHECK.body}</p>
+              <p className="pcheck__line">
+                {PROFILE_CHECK.line}
+                <span className="rose">{PROFILE_CHECK.lineAccent}</span>
               </p>
-              <div className="chatwarn__acts" aria-hidden="true">
-                <span>{CHAT_WARNING.report}</span>
-                <span>{CHAT_WARNING.learn}</span>
-              </div>
             </div>
 
             <div className="checkin">

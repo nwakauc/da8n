@@ -9,7 +9,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Cities } from "@/components/landing/Cities";
 import { Compatibility } from "@/components/landing/Compatibility";
 import { Safety } from "@/components/landing/Safety";
-import { Stories } from "@/components/landing/Stories";
+import { Journeys } from "@/components/landing/Journeys";
 import { Membership } from "@/components/landing/Membership";
 import { Faq } from "@/components/landing/Faq";
 import { ClosingCta } from "@/components/landing/ClosingCta";
@@ -82,7 +82,7 @@ export default function HomePage() {
       <Compatibility />
       <Cities />
       <Safety />
-      <Stories />
+      <Journeys />
       <Membership />
       <Faq />
       <ClosingCta />

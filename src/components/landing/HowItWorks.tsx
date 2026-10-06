@@ -234,11 +234,24 @@ function PhoneScreen({ index }: { readonly index: number }) {
             <i />
           </div>
         ))}
-        <b className="phone__sub">Open to meeting people in</b>
+        <b className="phone__sub">Open to meeting people from</b>
         <div className="chips">
           <span className="chip">London</span>
           <span className="chip">Toronto</span>
           <span className="chip chip--off">Worldwide</span>
+        </div>
+        {/*
+          "Open to dating" — the second half of what v4 means by OPEN TO, and
+          the reason the pillar now says "race, ethnicity, cities and regions".
+          These are the member's own filters shown in a mockup, not a claim
+          about who the product shows anyone; `Any` is deliberately in the row
+          so the depiction cannot read as a required choice.
+        */}
+        <b className="phone__sub">Open to dating</b>
+        <div className="chips">
+          <span className="chip chip--rose">Black</span>
+          <span className="chip chip--rose">White</span>
+          <span className="chip chip--off">Any</span>
         </div>
         <div className="phone__cta">Continue</div>
       </PhoneFrame>

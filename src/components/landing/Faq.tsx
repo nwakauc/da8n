@@ -23,7 +23,6 @@ export function Faq() {
         <div className="faq__intro">
           <Eyebrow num={FAQ_SECTION.num}>{FAQ_SECTION.eyebrow}</Eyebrow>
           <h2 id="faq-title">{FAQ_SECTION.title}</h2>
-          <p>{FAQ_SECTION.lede}</p>
 
           {/*
             The guides card. Titles come from `content/guides.ts` by slug
@@ -58,17 +57,26 @@ export function Faq() {
           </div>
         </div>
 
-        <div className="faq__list">
-          {FAQS.map((faq) => (
-            <details key={faq.question} className="faq__item">
-              <summary className="faq__q">
-                {faq.question}
-                <i aria-hidden="true">+</i>
-              </summary>
-              <p className="faq__a">{faq.answer}</p>
-            </details>
-          ))}
-        </div>
+        {/*
+          Two columns of questions, split where the design splits them: five
+          then four. Source order is reading order, so the split is a slice
+          rather than a column-count — CSS `columns` would reflow the nine into
+          an order that does not match the DOM, and a keyboard user tabbing
+          through a disclosure list would jump around the page.
+        */}
+        {[FAQS.slice(0, 5), FAQS.slice(5)].map((column) => (
+          <div key={column[0].question} className="faq__col">
+            {column.map((faq) => (
+              <details key={faq.question} className="faq__item">
+                <summary className="faq__q">
+                  {faq.question}
+                  <i aria-hidden="true">+</i>
+                </summary>
+                <p className="faq__a">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        ))}
       </div>
     </section>
   );

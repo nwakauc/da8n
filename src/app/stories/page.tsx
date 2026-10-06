@@ -1,32 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import "../landing.css";
 import { ImageSlot } from "@/components/ImageSlot";
 import { breadcrumbJsonLd, buildPageMetadata, toJsonLdScript, webPageJsonLd } from "@/lib/seo";
-import { FEATURED_STORY, STORIES } from "@/content/landing";
+import { FEATURED_JOURNEY, JOURNEYS } from "@/content/landing";
 import { JOIN_CTA } from "@/content/route-copy";
 import { JOIN_URL } from "@/lib/app-links";
 
 const DESCRIPTION =
-  "Couples who met on DA8N, in their own words — across cities, countries and time zones.";
+  "How people have met on DA8N — across cities, countries and time zones.";
 
 /**
  * `/stories` — member stories.
  *
- * Renders the same `FEATURED_STORY` and `STORIES` the landing page does, from
- * the same file. That identity is deliberate: there is exactly one place a
- * story's wording lives, so a correction or a withdrawn consent cannot be
- * applied in one place and missed in the other.
+ * Renders the same `FEATURED_JOURNEY` and `JOURNEYS` the landing page does,
+ * from the same file. That identity is deliberate: there is exactly one place
+ * this wording lives, so a correction cannot be applied in one place and
+ * missed in the other.
  *
- * CONSENT. Every quote, name and date here is about real people and needs
- * their written consent on file before it ships. See CONTENT INTEGRITY in
- * `content/landing.ts`.
+ * NO NAMES AND NO QUOTES, since v4. Through v3 this page carried testimonials
+ * attributed to named couples, which needed each couple's written consent on
+ * file and never had it. v4 removed the attribution from the section rather
+ * than shipping the claim and tracking the paperwork — see the note on
+ * `JOURNEYS` in `content/landing.ts`. If consented stories are ever collected,
+ * this is the page they belong on, with names and quotes restored.
  *
- * NO REVIEW OR AGGREGATERATING MARKUP. A page of testimonials is the most
- * tempting place on a site to emit it, and it is a fabricated claim: DA8N
- * publishes no ratings and collects none. WebPage and BreadcrumbList only.
+ * NO REVIEW OR AGGREGATERATING MARKUP. A page like this is the most tempting
+ * place on a site to emit it, and it is a fabricated claim: DA8N publishes no
+ * ratings and collects none. WebPage and BreadcrumbList only.
  *
- * `indexable: false` until the consent register is in place — this is the one
- * page whose entire content is other people's words.
+ * `indexable: false` while the page has this little on it.
  */
 export const metadata: Metadata = buildPageMetadata({
   title: "Stories",
@@ -46,12 +49,11 @@ export default function StoriesPage() {
 
   const all = [
     {
-      quote: FEATURED_STORY.quote,
-      who: FEATURED_STORY.who,
-      chips: [FEATURED_STORY.route, FEATURED_STORY.milestones[2].value] as const,
-      photo: FEATURED_STORY.photo,
+      headline: FEATURED_JOURNEY.headline,
+      chips: [FEATURED_JOURNEY.route, FEATURED_JOURNEY.facts[2].value] as const,
+      photo: FEATURED_JOURNEY.photo,
     },
-    ...STORIES,
+    ...JOURNEYS,
   ];
 
   return (
@@ -79,12 +81,12 @@ export default function StoriesPage() {
           </div>
         </header>
 
-        <div className="stories__grid">
-          {all.map((story) => (
-            <figure key={story.who} className="story">
-              <div className="story__media">
+        <div className="journeys__grid">
+          {all.map((journey) => (
+            <figure key={journey.headline} className="journey">
+              <div className="journey__media">
                 <ImageSlot
-                  src={story.photo}
+                  src={journey.photo}
                   alt=""
                   placeholder="Couple photo"
                   className="slot-fill"
@@ -92,17 +94,14 @@ export default function StoriesPage() {
                 />
               </div>
               <figcaption>
-                <blockquote>{story.quote}</blockquote>
-                <div className="story__who">
-                  <b>{story.who}</b>
-                  <span className="story__chips">
-                    {story.chips.map((chip, position) => (
-                      <span key={chip} className={position === 0 ? "chip chip--ink" : "chip"}>
-                        {chip}
-                      </span>
-                    ))}
-                  </span>
-                </div>
+                <h2>{journey.headline}</h2>
+                <span className="journey__chips">
+                  {journey.chips.map((chip, position) => (
+                    <span key={chip} className={position === 0 ? "chip chip--ink" : "chip"}>
+                      {chip}
+                    </span>
+                  ))}
+                </span>
               </figcaption>
             </figure>
           ))}
